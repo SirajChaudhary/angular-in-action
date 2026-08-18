@@ -1,177 +1,155 @@
-# Lesson 8 — Directives
+# Lesson 9 — Services & Dependency Injection
 
-# What are Directives
+# What are Services
 
-Directives are classes that add behavior to elements or components.
+A service is a TypeScript class that contains reusable application logic or data.
 
-Angular directives can be used to:
+Services are commonly used for:
 
-- Change the appearance of an element.
-- Add behavior to an element.
-- Manipulate element properties.
-- Respond to user interactions.
-- Reuse UI behavior across multiple elements.
+- Sharing data between components.
+- Calling APIs.
+- Containing business logic.
+- Managing application state.
+- Encapsulating reusable functionality.
 
-# Types of Directives
+A component should primarily focus on the UI and user interaction.
 
-1. Attribute directives
-2. Structural directives
-3. Component directives
+A service can handle reusable logic outside the component.
 
-| Type | Purpose | Example |
-|---|---|---|
-| Attribute directive | Change appearance or behavior | `ngClass`, `ngStyle` |
-| Structural directive | Add/remove/repeat template content | `*ngIf`, `*ngFor` |
-| Component | Directive with its own template | `@Component` |
+# Why Use Services
 
-Angular 21 also provides the modern built-in control-flow syntax such as:
+Without a service, a component may contain too much logic:
 
 ```text
-@if
-@for
-@switch
+Component
+├── UI logic
+├── API calls
+├── Business logic
+├── Data management
+└── Shared functionality
 ```
 
-These are the modern replacement for many common structural-directive use cases.
+With services:
 
-# 1. Attribute Directives
-
-Attribute directives change the behavior or appearance of an existing element.
-
-Examples include:
-
-```html
-<div [ngClass]="..."></div>
+```text
+Component
+   │
+   └── Service
+        ├── Business logic
+        ├── Data
+        └── API operations
 ```
 
-and:
+This makes the application easier to maintain and test.
 
-```html
-<div [ngStyle]="..."></div>
+# Dependency Injection
+
+Dependency Injection, commonly called DI, is a design pattern where an object receives the dependencies it needs instead of creating them itself.
+
+For example, instead of a component creating a service:
+
+```typescript
+const customerService = new CustomerService();
 ```
 
-An attribute directive does not normally create its own template.
+Angular can provide the service and inject it into the component.
 
-It operates on an existing element.
+Conceptually:
 
-# 2. Structural Directives
-
-Structural directives change the structure of the DOM by adding or removing elements.
-
-Traditional Angular examples include:
-
-```html
-<div *ngIf="isActive">
-  Active Customer
-</div>
+```text
+Angular
+   │
+   └── CustomerService
+           │
+           ↓
+       Customer
+       Component
 ```
 
-and:
+The component simply declares that it needs `CustomerService`.
 
-```html
-<div *ngFor="let customer of customers">
-  {{ customer.name }}
-</div>
-```
+# @Injectable
 
-However, modern Angular applications use the built-in control-flow syntax:
-
-```html
-@if (isActive) {
-  <div>Active Customer</div>
-}
-```
-
-and:
-
-```html
-@for (customer of customers; track customer.id) {
-  <div>{{ customer.name }}</div>
-}
-```
-
-For new Angular 21 applications, prefer the modern control-flow syntax.
-
-# 3. Component Directives
-
-A component is a specialized type of directive that has its own template.
+Angular services commonly use the `@Injectable` decorator.
 
 Example:
 
 ```typescript
-@Component({
-  selector: 'app-customer',
-  templateUrl: './customer.html'
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
 })
-export class Customer {
+export class CustomerService {
 }
 ```
 
-A component represents a reusable UI feature, while an attribute directive enhances an existing element or component.
+`@Injectable` tells Angular that the class can participate in Angular's dependency-injection system.
 
-# How to Implement a Custom Directive in the Current Application
+# providedIn: 'root'
 
-Create/use **initial Angular project skeleton** and create the `highlight` directive.
+The following configuration:
+
+```typescript
+@Injectable({
+  providedIn: 'root'
+})
+```
+
+registers the service with the application's root injector.
+
+This is the common approach for application-wide services.
+
+It also allows Angular to include the service in the application only when it is needed.
+
+# How to Implement a Service in the Current Application
+
+Create/use **initial Angular project skeleton** and create the `CustomerService` service.
 
 ```bash
 ng new my-angular-application
-ng g directive directives/highlight
+ng g service services/customer
 ```
 
 The CLI creates:
 
 ```text
-src/app/directives/
-├── highlight.ts
-└── highlight.spec.ts
+src/app/services/
+├── customer.ts
+└── customer.spec.ts
 ```
 
-Then implement the directive step by step.
+Then implement the service and dependency injection step by step.
 
-### Step 1: Open the Highlight Directive
+### Step 1: Open the Customer Service
 
 Open:
 
 ```text
-src/app/directives/highlight.ts
+src/app/services/customer.ts
 ```
 
 Update it:
 
 ```typescript
-import { Directive, ElementRef, HostListener } from '@angular/core';
+import { Injectable } from '@angular/core';
 
-@Directive({
-  selector: '[appHighlight]'
+@Injectable({
+  providedIn: 'root'
 })
-export class Highlight {
-  constructor(private elementRef: ElementRef) {}
+export class CustomerService {
 
-  @HostListener('mouseenter')
-  onMouseEnter(): void {
-    this.elementRef.nativeElement.style.backgroundColor = 'yellow';
+  getCustomerName(): string {
+    return 'Siraj';
   }
 
-  @HostListener('mouseleave')
-  onMouseLeave(): void {
-    this.elementRef.nativeElement.style.backgroundColor = '';
+  getCustomerEmail(): string {
+    return 'siraj@example.com';
   }
 }
 ```
 
-The selector:
-
-```typescript
-selector: '[appHighlight]'
-```
-
-means the directive can be used as an HTML attribute:
-
-```html
-<p appHighlight>
-  Customer
-</p>
-```
+The service now contains reusable customer-related logic.
 
 ### Step 2: Create the Customer Component
 
@@ -191,7 +169,7 @@ src/app/customer/
 └── customer.spec.ts
 ```
 
-### Step 3: Import the Directive
+### Step 3: Inject the Service into the Component
 
 Open:
 
@@ -203,21 +181,40 @@ Update it:
 
 ```typescript
 import { Component } from '@angular/core';
-import { Highlight } from '../directives/highlight';
+import { CustomerService } from '../services/customer';
 
 @Component({
   selector: 'app-customer',
-  imports: [Highlight],
+  imports: [],
   templateUrl: './customer.html',
   styleUrl: './customer.css'
 })
 export class Customer {
+
+  constructor(private customerService: CustomerService) {
+  }
+
+  getCustomerName(): string {
+    return this.customerService.getCustomerName();
+  }
+
+  getCustomerEmail(): string {
+    return this.customerService.getCustomerEmail();
+  }
 }
 ```
 
-Because this is a standalone component, the directive is imported directly into the component.
+Angular sees:
 
-### Step 4: Use the Directive
+```typescript
+constructor(private customerService: CustomerService)
+```
+
+and provides the required `CustomerService` instance.
+
+The component does not create the service using `new`.
+
+### Step 4: Use the Service Data in the Template
 
 Open:
 
@@ -228,18 +225,23 @@ src/app/customer/customer.html
 Add:
 
 ```html
-<h2>Directives</h2>
+<h2>Services & Dependency Injection</h2>
 
-<p appHighlight>
-  Move the mouse over this text.
-</p>
-
-<button appHighlight>
-  Move the mouse over this button.
-</button>
+<p>Name: {{ getCustomerName() }}</p>
+<p>Email: {{ getCustomerEmail() }}</p>
 ```
 
-The same directive can now be reused on different elements.
+The flow is:
+
+```text
+Customer Template
+       ↓
+Customer Component
+       ↓
+CustomerService
+       ↓
+Customer Data
+```
 
 ### Step 5: Update app.html
 
@@ -292,155 +294,134 @@ Open:
 http://localhost:4200
 ```
 
-Move the mouse over:
+Expected output:
 
 ```text
-Move the mouse over this text.
+Services & Dependency Injection
+
+Name: Siraj
+Email: siraj@example.com
 ```
 
-The background should change to yellow.
+<img width="3838" height="520" alt="image" src="https://github.com/user-attachments/assets/43b6a436-ea9a-4506-bd1d-006ebc1326aa" />
 
-Move the mouse away and the background should return to normal.
+# How Dependency Injection Works
 
-<img width="3840" height="498" alt="Directive highlight example" src="https://github.com/user-attachments/assets/166ea015-a546-45ed-842e-a910786d1896" />
-
-# How the Custom Directive Works
-
-The directive:
+The important part is:
 
 ```typescript
-@Directive({
-  selector: '[appHighlight]'
+constructor(private customerService: CustomerService) {
+}
+```
+
+The component declares:
+
+```text
+I need CustomerService.
+```
+
+Angular's dependency-injection system provides it.
+
+The component does not need to know how the service is created.
+
+```text
+Customer Component
+        │
+        │ requests
+        ↓
+CustomerService
+        ↑
+        │
+     Angular
+      DI
+```
+
+# Service Responsibilities
+
+A service can contain logic that should not belong directly inside a component.
+
+For example:
+
+```typescript
+export class CustomerService {
+
+  getCustomerName(): string {
+    return 'Siraj';
+  }
+
+  getCustomerEmail(): string {
+    return 'siraj@example.com';
+  }
+}
+```
+
+The component consumes that functionality:
+
+```typescript
+getCustomerName(): string {
+  return this.customerService.getCustomerName();
+}
+```
+
+The service owns the customer-related logic.
+
+# Service vs Component
+
+| Component | Service |
+|---|---|
+| Focuses on UI | Focuses on reusable logic |
+| Has a template | Normally has no template |
+| Uses `@Component` | Uses `@Injectable` |
+| Handles UI interaction | Handles application/business logic |
+| Represents a UI feature | Provides reusable functionality |
+| Example: `Customer` | Example: `CustomerService` |
+
+# Service Scope
+
+Angular allows services to be provided at different levels.
+
+The most common application-wide approach is:
+
+```typescript
+@Injectable({
+  providedIn: 'root'
 })
 ```
 
-defines the directive.
+This makes the service available throughout the application.
 
-The selector:
+A service can also be provided at a component or other injector level when a separate instance or narrower scope is required.
+
+# Reusing the Service
+
+The same service can be injected into multiple components.
+
+For example:
+
+```typescript
+constructor(private customerService: CustomerService) {
+}
+```
+
+Another component can also inject it:
+
+```typescript
+constructor(private customerService: CustomerService) {
+}
+```
+
+Both components can use the same application-level service.
 
 ```text
-[appHighlight]
+             Customer Component
+                    │
+                    ↓
+             CustomerService
+                    ↑
+                    │
+             Customer List
+                Component
 ```
-
-matches elements containing the `appHighlight` attribute.
-
-For example:
-
-```html
-<p appHighlight>
-```
-
-Angular attaches the directive to that `<p>` element.
-
-# HostListener
-
-The directive uses:
-
-```typescript
-@HostListener('mouseenter')
-```
-
-to listen for the host element's `mouseenter` event.
-
-When the event occurs:
-
-```typescript
-onMouseEnter(): void {
-  this.elementRef.nativeElement.style.backgroundColor = 'yellow';
-}
-```
-
-When the mouse leaves:
-
-```typescript
-@HostListener('mouseleave')
-```
-
-Angular calls:
-
-```typescript
-onMouseLeave(): void {
-  this.elementRef.nativeElement.style.backgroundColor = '';
-}
-```
-
-# ElementRef
-
-`ElementRef` provides access to the DOM element associated with the directive.
-
-Example:
-
-```typescript
-constructor(private elementRef: ElementRef) {}
-```
-
-The host element can then be accessed through:
-
-```typescript
-this.elementRef.nativeElement
-```
-
-For example:
-
-```typescript
-this.elementRef.nativeElement.style.backgroundColor = 'yellow';
-```
-
-For simple DOM behavior this demonstrates the concept clearly, although Angular's template bindings and renderer-based approaches are generally preferable to direct DOM manipulation when practical.
-
-# Directive vs Component
-
-| Component | Directive |
-|---|---|
-| Has its own template | Does not require its own template |
-| Defines a UI component | Adds behavior or appearance |
-| Uses `@Component` | Uses `@Directive` |
-| Usually represents a UI feature | Usually enhances an existing element |
-| Example: `Customer` | Example: `Highlight` |
-
-A component is technically a specialized type of directive that has a template.
-
-# Directive Selector
-
-Our directive uses:
-
-```typescript
-selector: '[appHighlight]'
-```
-
-Therefore:
-
-```html
-<p appHighlight>
-```
-
-works.
-
-The square brackets in the selector indicate that Angular is matching an attribute.
-
-A directive can also use other selector forms, but attribute selectors are commonly used for custom behavior directives.
-
-# Reusing a Directive
-
-One of the main benefits of a directive is reuse.
-
-The same directive can be applied to multiple elements:
-
-```html
-<p appHighlight>
-  Customer Name
-</p>
-
-<p appHighlight>
-  Customer Email
-</p>
-
-<button appHighlight>
-  Select Customer
-</button>
-```
-
-All three elements use the same directive implementation.
 
 # Practical Project Structure
 
@@ -452,9 +433,9 @@ my-angular-application/
 │
 ├── src/
 │   ├── app/
-│   │   ├── directives/
-│   │   │   ├── highlight.ts
-│   │   │   └── highlight.spec.ts
+│   │   ├── services/
+│   │   │   ├── customer.ts
+│   │   │   └── customer.spec.ts
 │   │   │
 │   │   ├── customer/
 │   │   │   ├── customer.ts
@@ -487,23 +468,21 @@ my-angular-application/
 
 | Concept | Purpose | Example |
 |---|---|---|
-| Attribute directive | Change behavior/appearance | `[ngClass]` |
-| Structural directive | Change template structure | `*ngIf`, `*ngFor` |
-| Modern control flow | Modern template control flow | `@if`, `@for` |
-| Custom directive | Create reusable behavior | `[appHighlight]` |
-| `@Directive` | Define a directive | `@Directive({...})` |
-| `selector` | Define where directive applies | `[appHighlight]` |
-| `HostListener` | Listen to host events | `@HostListener('mouseenter')` |
-| `ElementRef` | Access host element | `elementRef.nativeElement` |
+| Service | Reusable application logic | `CustomerService` |
+| `@Injectable` | Makes a class available for DI | `@Injectable({...})` |
+| `providedIn: 'root'` | Registers service with root injector | `providedIn: 'root'` |
+| Dependency Injection | Provides required dependencies | `constructor(private service: CustomerService)` |
+| Service injection | Gives component access to service | `CustomerService` |
+| Component | Consumes service functionality | `Customer` |
 
 # Key Takeaways
 
-- Directives add behavior or appearance to existing elements.
-- Attribute directives work with existing elements.
-- Structural directives change the structure of the DOM.
-- Angular 21 provides modern control flow such as `@if` and `@for`.
-- Custom directives are created using `@Directive`.
-- A directive is reusable across multiple elements.
-- Standalone components import the directives they use directly.
-- `@HostListener` can be used to respond to host element events.
-- `ElementRef` provides access to the directive's host element.
+- Services contain reusable application or business logic.
+- Components should focus primarily on UI and user interaction.
+- Angular provides Dependency Injection to supply services to components.
+- `@Injectable` is used for Angular services.
+- `providedIn: 'root'` is the common approach for application-wide services.
+- Components receive services through dependency injection.
+- A component should not normally create services using `new`.
+- Services can be reused by multiple components.
+- Dependency Injection reduces coupling between components and their dependencies.
