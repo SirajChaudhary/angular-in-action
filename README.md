@@ -1,175 +1,311 @@
-# Lesson 9 — Services & Dependency Injection
+# Lesson 10 — Pipes
 
-# What are Services
+# What are Pipes
 
-A service is a TypeScript class that contains reusable application logic or data.
+Pipes transform data in an Angular template before displaying it.
 
-Services are commonly used for:
+They are commonly used for:
 
-- Sharing data between components.
-- Calling APIs.
-- Containing business logic.
-- Managing application state.
-- Encapsulating reusable functionality.
+- Formatting text.
+- Formatting numbers.
+- Formatting currency.
+- Formatting dates.
+- Displaying JSON data.
+- Creating reusable presentation transformations.
 
-A component should primarily focus on the UI and user interaction.
+Pipes transform the value for display without changing the original component property.
 
-A service can handle reusable logic outside the component.
+# Pipe Syntax
 
-# Why Use Services
+The basic syntax is:
 
-Without a service, a component may contain too much logic:
-
-```text
-Component
-├── UI logic
-├── API calls
-├── Business logic
-├── Data management
-└── Shared functionality
+```html
+{{ value | pipeName }}
 ```
 
-With services:
+Example:
 
-```text
-Component
-   │
-   └── Service
-        ├── Business logic
-        ├── Data
-        └── API operations
+```html
+<p>{{ name | uppercase }}</p>
 ```
 
-This makes the application easier to maintain and test.
-
-# Dependency Injection
-
-Dependency Injection, commonly called DI, is a design pattern where an object receives the dependencies it needs instead of creating them itself.
-
-For example, instead of a component creating a service:
+If:
 
 ```typescript
-const customerService = new CustomerService();
+name = 'Siraj';
 ```
 
-Angular can provide the service and inject it into the component.
-
-Conceptually:
+the output is:
 
 ```text
-Angular
-   │
-   └── CustomerService
-           │
-           ↓
-       Customer
-       Component
+SIRAJ
 ```
 
-The component simply declares that it needs `CustomerService`.
+# Pipe with Parameters
 
-# @Injectable
+A pipe can receive parameters.
 
-Angular services commonly use the `@Injectable` decorator.
+Syntax:
+
+```html
+{{ value | pipeName: parameter }}
+```
+
+Example:
+
+```html
+{{ price | currency:'INR' }}
+```
+
+# Built-in Pipes
+
+Angular provides several built-in pipes.
+
+| Pipe | Purpose | Angular Class | Example |
+|---|---|---|---|
+| `uppercase` | Converts text to uppercase | `UpperCasePipe` | `{{ name \| uppercase }}` |
+| `lowercase` | Converts text to lowercase | `LowerCasePipe` | `{{ name \| lowercase }}` |
+| `titlecase` | Converts text to title case | `TitleCasePipe` | `{{ name \| titlecase }}` |
+| `currency` | Formats currency | `CurrencyPipe` | `{{ price \| currency }}` |
+| `number` | Formats numbers | `DecimalPipe` | `{{ price \| number }}` |
+| `percent` | Formats percentages | `PercentPipe` | `{{ percentage \| percent }}` |
+| `date` | Formats dates | `DatePipe` | `{{ today \| date }}` |
+| `json` | Displays an object as JSON | `JsonPipe` | `{{ customer \| json }}` |
+
+# 1. Uppercase Pipe
+
+The `uppercase` pipe converts text to uppercase.
+
+```html
+<p>{{ name | uppercase }}</p>
+```
+
+If:
+
+```typescript
+name = 'Siraj';
+```
+
+Output:
+
+```text
+SIRAJ
+```
+
+# 2. Lowercase Pipe
+
+The `lowercase` pipe converts text to lowercase.
+
+```html
+<p>{{ name | lowercase }}</p>
+```
+
+Output:
+
+```text
+siraj
+```
+
+# 3. Titlecase Pipe
+
+The `titlecase` pipe converts text to title case.
+
+```html
+<p>{{ customerName | titlecase }}</p>
+```
+
+If:
+
+```typescript
+customerName = 'siraj chaudhary';
+```
+
+Output:
+
+```text
+Siraj Chaudhary
+```
+
+# 4. Currency Pipe
+
+The `currency` pipe formats a number as currency.
+
+Example:
+
+```html
+<p>{{ price | currency }}</p>
+```
+
+For Indian Rupees:
+
+```html
+<p>{{ price | currency:'INR' }}</p>
+```
 
 Example:
 
 ```typescript
-import { Injectable } from '@angular/core';
-
-@Injectable({
-  providedIn: 'root'
-})
-export class CustomerService {
-}
+price = 5000;
 ```
 
-`@Injectable` tells Angular that the class can participate in Angular's dependency-injection system.
+The output is formatted as a currency value.
 
-# providedIn: 'root'
+You can also specify the display format:
 
-The following configuration:
+```html
+<p>{{ price | currency:'INR':'symbol' }}</p>
+```
+
+# 5. Number Pipe
+
+The `number` pipe formats numeric values.
+
+In a standalone component, Angular's `number` pipe is provided by `DecimalPipe`.
 
 ```typescript
-@Injectable({
-  providedIn: 'root'
-})
+import { DecimalPipe } from '@angular/common';
 ```
 
-registers the service with the application's root injector.
+Add it to the component imports:
 
-This is the common approach for application-wide services.
+```typescript
+imports: [DecimalPipe]
+```
 
-It also allows Angular to include the service in the application only when it is needed.
+Template:
 
-# How to Implement a Service in the Current Application
+```html
+<p>{{ price | number }}</p>
+```
 
-Create/use **initial Angular project skeleton** and create the `CustomerService` service.
+You can specify minimum and maximum digits:
+
+```html
+<p>{{ price | number:'1.2-2' }}</p>
+```
+
+The format:
+
+```text
+minimumIntegerDigits.minimumFractionDigits-maximumFractionDigits
+```
+
+For example:
+
+```text
+1.2-2
+```
+
+means:
+
+- At least 1 integer digit.
+- At least 2 decimal digits.
+- Maximum 2 decimal digits.
+
+# 6. Percent Pipe
+
+The `percent` pipe formats a number as a percentage.
+
+```html
+<p>{{ completion | percent }}</p>
+```
+
+If:
+
+```typescript
+completion = 0.75;
+```
+
+Output:
+
+```text
+75%
+```
+
+# 7. Date Pipe
+
+The `date` pipe formats a JavaScript `Date`.
+
+Example:
+
+```typescript
+today = new Date();
+```
+
+Template:
+
+```html
+<p>{{ today | date }}</p>
+```
+
+You can specify a format:
+
+```html
+<p>{{ today | date:'dd/MM/yyyy' }}</p>
+```
+
+Another example:
+
+```html
+<p>{{ today | date:'medium' }}</p>
+```
+
+# 8. JSON Pipe
+
+The `json` pipe converts an object into a JSON representation.
+
+Example:
+
+```typescript
+customer = {
+  id: 1,
+  name: 'Siraj',
+  email: 'siraj@example.com'
+};
+```
+
+Template:
+
+```html
+<pre>{{ customer | json }}</pre>
+```
+
+This is particularly useful when debugging data in a template.
+
+# 9. Chaining Pipes
+
+Multiple pipes can be applied to the same value.
+
+Example:
+
+```html
+<p>{{ name | lowercase | titlecase }}</p>
+```
+
+Angular evaluates the pipes from left to right.
+
+```text
+name
+ ↓
+lowercase
+ ↓
+titlecase
+ ↓
+display
+```
+
+# How to Implement Pipes in the Current Application
+
+Create/use **initial Angular project skeleton** and create the `customer` component.
 
 ```bash
 ng new my-angular-application
-ng g service services/customer
-```
-
-The CLI creates:
-
-```text
-src/app/services/
-├── customer.ts
-└── customer.spec.ts
-```
-
-Then implement the service and dependency injection step by step.
-
-### Step 1: Open the Customer Service
-
-Open:
-
-```text
-src/app/services/customer.ts
-```
-
-Update it:
-
-```typescript
-import { Injectable } from '@angular/core';
-
-@Injectable({
-  providedIn: 'root'
-})
-export class CustomerService {
-
-  getCustomerName(): string {
-    return 'Siraj';
-  }
-
-  getCustomerEmail(): string {
-    return 'siraj@example.com';
-  }
-}
-```
-
-The service now contains reusable customer-related logic.
-
-### Step 2: Create the Customer Component
-
-Create the component:
-
-```bash
 ng g c customer
 ```
 
-Angular creates:
+Then implement the pipe examples step by step.
 
-```text
-src/app/customer/
-├── customer.ts
-├── customer.html
-├── customer.css
-└── customer.spec.ts
-```
-
-### Step 3: Inject the Service into the Component
+### Step 1: Open the Customer Component
 
 Open:
 
@@ -181,81 +317,50 @@ Update it:
 
 ```typescript
 import { Component } from '@angular/core';
-import { CustomerService } from '../services/customer';
+import {
+  CurrencyPipe,
+  DatePipe,
+  DecimalPipe,
+  JsonPipe,
+  LowerCasePipe,
+  PercentPipe,
+  TitleCasePipe,
+  UpperCasePipe
+} from '@angular/common';
 
 @Component({
   selector: 'app-customer',
-  imports: [],
+  imports: [
+    CurrencyPipe,
+    DatePipe,
+    DecimalPipe,
+    JsonPipe,
+    LowerCasePipe,
+    PercentPipe,
+    TitleCasePipe,
+    UpperCasePipe
+  ],
   templateUrl: './customer.html',
   styleUrl: './customer.css'
 })
 export class Customer {
+  name = 'siraj chaudhary';
+  email = 'siraj@example.com';
 
-  constructor(private customerService: CustomerService) {
-  }
+  price = 5000;
+  completion = 0.75;
 
-  getCustomerName(): string {
-    return this.customerService.getCustomerName();
-  }
+  today = new Date();
 
-  getCustomerEmail(): string {
-    return this.customerService.getCustomerEmail();
-  }
+  customer = {
+    id: 1,
+    name: 'Siraj',
+    email: 'siraj@example.com'
+  };
 }
 ```
 
-Angular sees:
-
-```typescript
-constructor(private customerService: CustomerService)
-```
-
-and provides the required `CustomerService` instance.
-
-The component does not create the service using `new`.
-
-### Step 4: Use the Service Data in the Template
-
-Open:
-
-```text
-src/app/customer/customer.html
-```
-
-Add:
-
-```html
-<h2>Services & Dependency Injection</h2>
-
-<p>Name: {{ getCustomerName() }}</p>
-<p>Email: {{ getCustomerEmail() }}</p>
-```
-
-The flow is:
-
-```text
-Customer Template
-       ↓
-Customer Component
-       ↓
-CustomerService
-       ↓
-Customer Data
-```
-
-### Step 5: Update app.html
-
-Open:
-
-```text
-src/app/app.html
-```
-
-Add:
-
-```html
-<app-customer></app-customer>
-```
+### Step 2: Add the Customer Component to the Root Component
 
 Open:
 
@@ -263,7 +368,7 @@ Open:
 src/app/app.ts
 ```
 
-Import `Customer` and include it in the component imports:
+Update it:
 
 ```typescript
 import { Component, signal } from '@angular/core';
@@ -280,7 +385,135 @@ export class App {
 }
 ```
 
-### Step 6: Run the Application
+### Step 3: Render the Customer Component
+
+Open:
+
+```text
+src/app/app.html
+```
+
+Add:
+
+```html
+<app-customer></app-customer>
+```
+
+### Step 4: Add Text Pipes
+
+Open:
+
+```text
+src/app/customer/customer.html
+```
+
+Add:
+
+```html
+<h2>Pipes</h2>
+
+<h3>Text Pipes</h3>
+
+<p>Original: {{ name }}</p>
+<p>Uppercase: {{ name | uppercase }}</p>
+<p>Lowercase: {{ name | lowercase }}</p>
+<p>Titlecase: {{ name | titlecase }}</p>
+```
+
+### Step 5: Add Currency and Number Pipes
+
+Add:
+
+```html
+<h3>Number Pipes</h3>
+
+<p>Price: {{ price | currency:'INR' }}</p>
+
+<p>Formatted Price: {{ price | number:'1.2-2' }}</p>
+
+<p>Completion: {{ completion | percent }}</p>
+```
+
+### Step 6: Add Date Pipe
+
+Add:
+
+```html
+<h3>Date Pipe</h3>
+
+<p>Default Date: {{ today | date }}</p>
+
+<p>Formatted Date: {{ today | date:'dd/MM/yyyy' }}</p>
+
+<p>Medium Date: {{ today | date:'medium' }}</p>
+```
+
+### Step 7: Add JSON Pipe
+
+Add:
+
+```html
+<h3>JSON Pipe</h3>
+
+<pre>{{ customer | json }}</pre>
+```
+
+### Step 8: Add Chained Pipes
+
+Add:
+
+```html
+<h3>Chained Pipes</h3>
+
+<p>{{ name | lowercase | titlecase }}</p>
+```
+
+### Step 9: Complete Customer Template
+
+The complete:
+
+```text
+src/app/customer/customer.html
+```
+
+can now be:
+
+```html
+<h2>Pipes</h2>
+
+<h3>Text Pipes</h3>
+
+<p>Original: {{ name }}</p>
+<p>Uppercase: {{ name | uppercase }}</p>
+<p>Lowercase: {{ name | lowercase }}</p>
+<p>Titlecase: {{ name | titlecase }}</p>
+
+<h3>Number Pipes</h3>
+
+<p>Price: {{ price | currency:'INR' }}</p>
+
+<p>Formatted Price: {{ price | number:'1.2-2' }}</p>
+
+<p>Completion: {{ completion | percent }}</p>
+
+<h3>Date Pipe</h3>
+
+<p>Default Date: {{ today | date }}</p>
+
+<p>Formatted Date: {{ today | date:'dd/MM/yyyy' }}</p>
+
+<p>Medium Date: {{ today | date:'medium' }}</p>
+
+<h3>JSON Pipe</h3>
+
+<pre>{{ customer | json }}</pre>
+
+<h3>Chained Pipes</h3>
+
+<p>{{ name | lowercase | titlecase }}</p>
+```
+
+### Step 10: Run the Application
 
 From the project root:
 
@@ -294,133 +527,168 @@ Open:
 http://localhost:4200
 ```
 
-Expected output:
+You should see the original values transformed by the different pipes.
+<br /><br />
+<img width="3840" height="1664" alt="image" src="https://github.com/user-attachments/assets/97e69b68-dd19-4357-8451-bb0cfca525e3" />
 
-```text
-Services & Dependency Injection
+# How Pipes Work
 
-Name: Siraj
-Email: siraj@example.com
+Consider:
+
+```html
+{{ name | uppercase }}
 ```
 
-<img width="3838" height="520" alt="image" src="https://github.com/user-attachments/assets/43b6a436-ea9a-4506-bd1d-006ebc1326aa" />
-
-# How Dependency Injection Works
-
-The important part is:
-
-```typescript
-constructor(private customerService: CustomerService) {
-}
-```
-
-The component declares:
+The value:
 
 ```text
-I need CustomerService.
+siraj chaudhary
 ```
 
-Angular's dependency-injection system provides it.
-
-The component does not need to know how the service is created.
+is passed to the `uppercase` pipe:
 
 ```text
-Customer Component
-        │
-        │ requests
+siraj chaudhary
         ↓
-CustomerService
-        ↑
-        │
-     Angular
-      DI
+    uppercase
+        ↓
+SIRAJ CHAUDHARY
 ```
 
-# Service Responsibilities
+The pipe transforms the value for display.
 
-A service can contain logic that should not belong directly inside a component.
+The original component property remains unchanged:
+
+```typescript
+name = 'siraj chaudhary';
+```
+
+# Pipe Parameters
+
+Some pipes accept parameters.
 
 For example:
 
-```typescript
-export class CustomerService {
-
-  getCustomerName(): string {
-    return 'Siraj';
-  }
-
-  getCustomerEmail(): string {
-    return 'siraj@example.com';
-  }
-}
+```html
+{{ price | currency:'INR' }}
 ```
 
-The component consumes that functionality:
-
-```typescript
-getCustomerName(): string {
-  return this.customerService.getCustomerName();
-}
-```
-
-The service owns the customer-related logic.
-
-# Service vs Component
-
-| Component | Service |
-|---|---|
-| Focuses on UI | Focuses on reusable logic |
-| Has a template | Normally has no template |
-| Uses `@Component` | Uses `@Injectable` |
-| Handles UI interaction | Handles application/business logic |
-| Represents a UI feature | Provides reusable functionality |
-| Example: `Customer` | Example: `CustomerService` |
-
-# Service Scope
-
-Angular allows services to be provided at different levels.
-
-The most common application-wide approach is:
-
-```typescript
-@Injectable({
-  providedIn: 'root'
-})
-```
-
-This makes the service available throughout the application.
-
-A service can also be provided at a component or other injector level when a separate instance or narrower scope is required.
-
-# Reusing the Service
-
-The same service can be injected into multiple components.
-
-For example:
-
-```typescript
-constructor(private customerService: CustomerService) {
-}
-```
-
-Another component can also inject it:
-
-```typescript
-constructor(private customerService: CustomerService) {
-}
-```
-
-Both components can use the same application-level service.
+Here:
 
 ```text
-             Customer Component
-                    │
-                    ↓
-             CustomerService
-                    ↑
-                    │
-             Customer List
-                Component
+price
+  ↓
+currency pipe
+  ↓
+INR parameter
+  ↓
+formatted currency
+```
+
+Another example:
+
+```html
+{{ today | date:'dd/MM/yyyy' }}
+```
+
+The date format is passed as a parameter to the pipe.
+
+# Pipe vs Component vs Service
+
+| Component | Service | Pipe |
+|---|---|---|
+| Handles UI | Handles reusable logic | Transforms display values |
+| Has a template | Normally no template | Used in templates |
+| Uses `@Component` | Uses `@Injectable` | Uses `@Pipe` |
+| Handles user interaction | Handles business/application logic | Handles presentation transformation |
+| Example: `Customer` | Example: `CustomerService` | Example: `uppercase` |
+
+# Built-in Pipes vs Custom Pipes
+
+Angular provides many built-in pipes.
+
+Examples:
+
+```text
+uppercase
+lowercase
+titlecase
+currency
+number
+percent
+date
+json
+```
+
+You can also create your own custom pipe when the required transformation is not provided by Angular.
+
+# Custom Pipes
+
+A custom pipe can encapsulate a reusable presentation transformation.
+
+For example, we could create a pipe that converts a customer name into a custom display format.
+
+Create a pipe:
+
+```bash
+ng g pipe pipes/customer-name
+```
+
+The CLI creates:
+
+```text
+src/app/pipes/
+├── customer-name.ts
+└── customer-name.spec.ts
+```
+
+Open:
+
+```text
+src/app/pipes/customer-name.ts
+```
+
+Example:
+
+```typescript
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({
+  name: 'customerName'
+})
+export class CustomerNamePipe implements PipeTransform {
+  transform(value: string): string {
+    return value.toUpperCase();
+  }
+}
+```
+
+Import the pipe into the standalone component:
+
+```typescript
+import { CustomerNamePipe } from '../pipes/customer-name';
+
+@Component({
+  selector: 'app-customer',
+  imports: [CustomerNamePipe],
+  templateUrl: './customer.html',
+  styleUrl: './customer.css'
+})
+export class Customer {
+  name = 'siraj chaudhary';
+}
+```
+
+Use the custom pipe:
+
+```html
+<p>{{ name | customerName }}</p>
+```
+
+Output:
+
+```text
+SIRAJ CHAUDHARY
 ```
 
 # Practical Project Structure
@@ -433,9 +701,9 @@ my-angular-application/
 │
 ├── src/
 │   ├── app/
-│   │   ├── services/
-│   │   │   ├── customer.ts
-│   │   │   └── customer.spec.ts
+│   │   ├── pipes/
+│   │   │   ├── customer-name.ts
+│   │   │   └── customer-name.spec.ts
 │   │   │
 │   │   ├── customer/
 │   │   │   ├── customer.ts
@@ -466,23 +734,26 @@ my-angular-application/
 
 # Quick Revision
 
-| Concept | Purpose | Example |
-|---|---|---|
-| Service | Reusable application logic | `CustomerService` |
-| `@Injectable` | Makes a class available for DI | `@Injectable({...})` |
-| `providedIn: 'root'` | Registers service with root injector | `providedIn: 'root'` |
-| Dependency Injection | Provides required dependencies | `constructor(private service: CustomerService)` |
-| Service injection | Gives component access to service | `CustomerService` |
-| Component | Consumes service functionality | `Customer` |
+| Pipe | Purpose | Angular Class | Example |
+|---|---|---|---|
+| `uppercase` | Uppercase text | `UpperCasePipe` | `{{ name \| uppercase }}` |
+| `lowercase` | Lowercase text | `LowerCasePipe` | `{{ name \| lowercase }}` |
+| `titlecase` | Title case text | `TitleCasePipe` | `{{ name \| titlecase }}` |
+| `currency` | Format currency | `CurrencyPipe` | `{{ price \| currency:'INR' }}` |
+| `number` | Format numbers | `DecimalPipe` | `{{ price \| number:'1.2-2' }}` |
+| `percent` | Format percentages | `PercentPipe` | `{{ completion \| percent }}` |
+| `date` | Format dates | `DatePipe` | `{{ today \| date:'dd/MM/yyyy' }}` |
+| `json` | Display object as JSON | `JsonPipe` | `{{ customer \| json }}` |
+| Custom pipe | Custom transformation | Custom pipe class | `{{ name \| customerName }}` |
 
 # Key Takeaways
 
-- Services contain reusable application or business logic.
-- Components should focus primarily on UI and user interaction.
-- Angular provides Dependency Injection to supply services to components.
-- `@Injectable` is used for Angular services.
-- `providedIn: 'root'` is the common approach for application-wide services.
-- Components receive services through dependency injection.
-- A component should not normally create services using `new`.
-- Services can be reused by multiple components.
-- Dependency Injection reduces coupling between components and their dependencies.
+- Pipes transform values for display in Angular templates.
+- Pipes do not normally change the original component property.
+- Angular provides many built-in pipes.
+- Pipes can accept parameters.
+- Multiple pipes can be chained together.
+- Custom pipes can be created for reusable presentation transformations.
+- Standalone components import the pipes they use directly.
+- The `number` pipe is provided by Angular's `DecimalPipe`.
+- Pipes should generally focus on presentation transformation rather than business logic.

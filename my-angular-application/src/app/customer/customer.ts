@@ -1,22 +1,42 @@
 import { Component } from '@angular/core';
-import { CustomerService } from '../services/customer';
+import {
+  CurrencyPipe,
+  DatePipe,
+  DecimalPipe,
+  JsonPipe,
+  LowerCasePipe,
+  PercentPipe,
+  TitleCasePipe,
+  UpperCasePipe
+} from '@angular/common';
 
 @Component({
   selector: 'app-customer',
-  imports: [],
+  imports: [
+    CurrencyPipe,
+    DatePipe,
+    DecimalPipe,
+    JsonPipe,
+    LowerCasePipe,
+    PercentPipe,
+    TitleCasePipe,
+    UpperCasePipe
+  ],
   templateUrl: './customer.html',
   styleUrl: './customer.css'
 })
 export class Customer {
+  name = 'siraj chaudhary';
+  email = 'siraj@example.com';
 
-  constructor(private customerService: CustomerService) {
-  }
+  price = 5000;
+  completion = 0.75;
 
-  getCustomerName(): string {
-    return this.customerService.getCustomerName();
-  }
+  today = new Date();
 
-  getCustomerEmail(): string {
-    return this.customerService.getCustomerEmail();
-  }
+  customer = {
+    id: 1,
+    name: 'Siraj',
+    email: 'siraj@example.com'
+  };
 }

@@ -1,4 +1,32 @@
-<h2>Services & Dependency Injection</h2>
+<h2>Pipes</h2>
 
-<p>Name: {{ getCustomerName() }}</p>
-<p>Email: {{ getCustomerEmail() }}</p>
+<h3>Text Pipes</h3>
+
+<p>Original: {{ name }}</p>
+<p>Uppercase: {{ name | uppercase }}</p>
+<p>Lowercase: {{ name | lowercase }}</p>
+<p>Titlecase: {{ name | titlecase }}</p>
+
+<h3>Number Pipes</h3>
+
+<p>Price: {{ price | currency:'INR' }}</p>
+
+<p>Formatted Price: {{ price | number:'1.2-2' }}</p>
+
+<p>Completion: {{ completion | percent }}</p>
+
+<h3>Date Pipe</h3>
+
+<p>Default Date: {{ today | date }}</p>
+
+<p>Formatted Date: {{ today | date:'dd/MM/yyyy' }}</p>
+
+<p>Medium Date: {{ today | date:'medium' }}</p>
+
+<h3>JSON Pipe</h3>
+
+<pre>{{ customer | json }}</pre>
+
+<h3>Chained Pipes</h3>
+
+<p>{{ name | lowercase | titlecase }}</p>
