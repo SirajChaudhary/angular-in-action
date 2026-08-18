@@ -1,233 +1,495 @@
-# Lesson 3 — Angular Environment Setup
+# Lesson 4 — Project Structure
 
-# Prerequisites
+# Create an Angular 21 Application
 
-| Tool | Purpose |
+Use Angular CLI to create a new Angular application.
+
+```bash
+ng new my-angular-application
+```
+
+Recommended choices:
+
+| Option | Choice |
 |---|---|
-| Node.js | JavaScript runtime required by Angular CLI |
-| NPM | Package manager for Angular dependencies |
-| Angular CLI | Create and manage Angular applications |
-| VS Code | Recommended code editor |
-| Angular Language Service | Angular support in VS Code |
-| Git | Source control |
+| Routing | Yes |
+| Stylesheet | CSS |
+| SSR/SSG | No |
 
-# Node.js
+Keep the other options at their Angular CLI defaults unless we specifically need to change them.
 
-Node.js provides the runtime required to run Angular CLI and other JavaScript-based development tools.
+Angular CLI creates the workspace and initial application structure.
 
-Check the installed version:
+# Run the Application
+
+Move into the application directory:
 
 ```bash
-node --version
+cd my-angular-application
 ```
+
+Start the development server:
+
+```bash
+ng serve
+```
+
+Open:
+
+```text
+http://localhost:4200
+```
+
+# Project Structure
+
+```text
+my-angular-application/
+├── public/                         # Static assets served directly by the application
+│
+├── src/                            # Application source code
+│   ├── app/                        # Angular components, configuration and application logic
+│   │   ├── app.ts                  # Root application component
+│   │   ├── app.html                # Root component template
+│   │   ├── app.css                 # Root component styles
+│   │   ├── app.config.ts           # Application-wide configuration and providers
+│   │   └── app.routes.ts           # Application routing configuration
+│   │
+│   ├── index.html                  # Main HTML page loaded by the browser
+│   ├── main.ts                     # Angular application entry point
+│   └── styles.css                  # Global application styles
+│
+├── .editorconfig                   # Editor formatting settings
+├── .gitignore                      # Files and folders ignored by Git
+├── angular.json                    # Angular CLI workspace configuration
+├── package.json                    # Project metadata, scripts and NPM dependencies
+├── package-lock.json               # Exact dependency versions installed by NPM
+├── tsconfig.json                   # Base TypeScript configuration
+├── tsconfig.app.json               # Application TypeScript configuration
+├── tsconfig.spec.json              # Test TypeScript configuration
+└── README.md                       # Project documentation
+```
+
+# public
+
+```text
+public/
+```
+
+- Contains static assets served directly by the application.
+- Files placed here do not require Angular compilation.
 
 Example:
 
 ```text
-v22.x.x
+public/
+└── favicon.ico
 ```
 
-# NPM
+# src
 
-NPM is installed with Node.js and is used to install Angular packages and other project dependencies.
-
-Check the version:
-
-```bash
-npm --version
+```text
+src/
 ```
+
+- Contains the application's source code.
+- Most Angular development takes place inside this directory.
+
+# src/app
+
+```text
+src/app/
+```
+
+- Contains Angular components, application configuration and application-specific logic.
+- As the application grows, this directory will contain folders such as `core`, `features` and `shared`.
+
+# app.ts
+
+```text
+src/app/app.ts
+```
+
+- Defines the root application component.
+- Contains the component metadata and TypeScript logic.
+
+Example:
+
+```typescript
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  imports: [],
+  templateUrl: './app.html',
+  styleUrl: './app.css'
+})
+export class App {
+}
+```
+
+# app.html
+
+```text
+src/app/app.html
+```
+
+- Contains the HTML template rendered by the root `App` component.
+
+The root component is connected to the browser through:
+
+```html
+<app-root></app-root>
+```
+
+# app.css
+
+```text
+src/app/app.css
+```
+
+- Contains styles specific to the root `App` component.
+
+# app.config.ts
+
+```text
+src/app/app.config.ts
+```
+
+- Contains application-wide Angular configuration and providers.
+- Used to configure features such as routing, HTTP and other providers.
+
+# app.routes.ts
+
+```text
+src/app/app.routes.ts
+```
+
+- Defines the application's routing configuration.
+- Contains routes that map URLs to Angular components.
+
+Example:
+
+```typescript
+import { Routes } from '@angular/router';
+
+export const routes: Routes = [];
+```
+
+# index.html
+
+```text
+src/index.html
+```
+
+- Main HTML document loaded by the browser.
+- Contains the root Angular element.
+
+Example:
+
+```html
+<body>
+  <app-root></app-root>
+</body>
+```
+
+Angular renders the root `App` component inside `<app-root>`.
+
+# main.ts
+
+```text
+src/main.ts
+```
+
+- Application entry point.
+- Bootstraps the root Angular component.
+
+Typical structure:
+
+```typescript
+import { bootstrapApplication } from '@angular/platform-browser';
+import { appConfig } from './app/app.config';
+import { App } from './app/app';
+
+bootstrapApplication(App, appConfig)
+  .catch((err) => console.error(err));
+```
+
+Application startup flow:
+
+```text
+main.ts
+   ↓
+bootstrapApplication()
+   ↓
+App
+   ↓
+app.html
+```
+
+# styles.css
+
+```text
+src/styles.css
+```
+
+- Contains global application styles.
+- Styles defined here can be used across the application.
+
+# angular.json
+
+```text
+angular.json
+```
+
+- Contains Angular CLI workspace configuration.
+- Controls settings related to building, serving, testing and other CLI operations.
+
+# package.json
+
+```text
+package.json
+```
+
+- Contains project metadata.
+- Defines NPM dependencies and development dependencies.
+- Contains project scripts.
+
+Example:
+
+```json
+{
+  "scripts": {
+    "start": "ng serve",
+    "build": "ng build",
+    "test": "ng test"
+  }
+}
+```
+
+# package-lock.json
+
+```text
+package-lock.json
+```
+
+- Records the exact dependency versions installed by NPM.
+- Helps ensure consistent dependency installation.
+
+# tsconfig.json
+
+```text
+tsconfig.json
+```
+
+- Base TypeScript compiler configuration.
+- Provides common TypeScript settings used by the application and test configurations.
+
+# tsconfig.app.json
+
+```text
+tsconfig.app.json
+```
+
+- Contains TypeScript compiler settings specific to application code.
+
+# tsconfig.spec.json
+
+```text
+tsconfig.spec.json
+```
+
+- Contains TypeScript compiler settings used for test files.
+
+# .gitignore
+
+```text
+.gitignore
+```
+
+- Specifies files and directories that Git should not track.
+
+Common examples include:
+
+```text
+node_modules/
+dist/
+```
+
+# .editorconfig
+
+```text
+.editorconfig
+```
+
+- Defines common editor settings.
+- Helps maintain consistent formatting across different editors.
+
+# README.md
+
+```text
+README.md
+```
+
+- Contains project documentation.
+- Can describe the application, setup instructions, commands and project information.
+
+# Recommended Angular Application Organization
+
+As the application grows, organize code by **feature and responsibility**.
+
+```text
+src/
+└── app/
+    ├── core/                       # Application-wide services, guards, interceptors and configuration
+    │   ├── guards/                 # Route guards used across the application
+    │   ├── interceptors/           # HTTP interceptors used across the application
+    │   └── services/               # Application-wide services
+    │
+    ├── features/                   # Business features and feature-specific functionality
+    │   ├── customers/              # Customer feature
+    │   ├── products/               # Product feature
+    │   └── orders/                 # Order feature
+    │
+    ├── shared/                     # Reusable functionality shared across features
+    │   ├── components/             # Reusable UI components
+    │   ├── directives/             # Reusable custom directives
+    │   ├── pipes/                  # Reusable custom pipes
+    │   └── models/                 # Shared interfaces and type definitions
+    │
+    ├── app.ts                      # Root application component
+    ├── app.html                    # Root component template
+    ├── app.css                     # Root component styles
+    ├── app.config.ts               # Application-wide configuration and providers
+    └── app.routes.ts               # Application routing configuration
+```
+
+# core
+
+```text
+core/
+```
+
+- Contains application-wide functionality used across multiple features.
+
+Typical structure:
+
+```text
+core/
+├── guards/                         # Route guards used across the application
+├── interceptors/                   # HTTP interceptors used across the application
+└── services/                       # Application-wide services
+```
+
+Examples:
+
+- Authentication services
+- Route guards
+- HTTP interceptors
+- Application-wide services
+
+# features
+
+```text
+features/
+```
+
+- Contains functionality organized by business or application feature.
 
 Example:
 
 ```text
-10.x.x
+features/
+├── customers/                      # Customer-related functionality
+├── products/                       # Product-related functionality
+└── orders/                         # Order-related functionality
 ```
 
-# Angular CLI
-
-Angular CLI is the command-line tool used to create and manage Angular applications.
-
-Check whether Angular CLI is installed:
-
-```bash
-ng version
-```
-
-If Angular CLI is not installed:
-
-```bash
-npm install -g @angular/cli
-```
-
-Verify:
-
-```bash
-ng version
-```
-
-For this course, we use **Angular 21**.
-
-# Verify Angular CLI
-
-Run:
-
-```bash
-ng version
-```
-
-You should see information similar to:
+A customer feature can contain its related components:
 
 ```text
-Angular CLI       : 21.x.x
-Angular           : 21.x.x
-Node.js           : 22.x.x
-Package Manager   : npm
+features/
+└── customers/
+    ├── customer-list/              # Customer list functionality
+    ├── customer-detail/            # Customer detail functionality
+    └── customer-form/              # Customer form functionality
 ```
 
-The exact patch versions may differ.
-
-# VS Code
-
-Visual Studio Code is the recommended editor for this course.
-
-Recommended extensions:
-
-| Extension | Purpose |
-|---|---|
-| Angular Language Service | Angular templates, navigation and diagnostics |
-| ESLint | Code-quality and linting support |
-| Prettier - Code formatter | Consistent code formatting |
-
-# Angular Language Service
-
-Angular Language Service provides Angular-specific editor support.
-
-It helps with:
-
-- Angular template syntax
-- Code completion
-- Template diagnostics
-- Navigation
-- Type information
-
-Install from:
+# shared
 
 ```text
-VS Code → Extensions → Angular Language Service
+shared/
 ```
 
-# ESLint
-
-ESLint helps identify potential problems and enforce coding rules.
-
-It can help detect:
-
-- Incorrect code patterns
-- Unused code
-- Potential errors
-- Project-specific rule violations
-
-# Prettier
-
-Prettier is used to automatically format source code.
-
-Benefits:
-
-- Consistent formatting
-- Easier code reviews
-- Consistent coding style
-
-# Git
-
-Git is used for source control.
-
-Check the installed version:
-
-```bash
-git --version
-```
+- Contains reusable functionality shared by multiple features.
 
 Example:
 
 ```text
-git version 2.x.x
+shared/
+├── components/                     # Reusable UI components
+├── directives/                     # Reusable custom directives
+├── pipes/                          # Reusable custom pipes
+└── models/                         # Shared interfaces and type definitions
 ```
 
-# Project Directory
+# Naming Conventions
 
-Our Angular course repository and local project directory are:
+Use consistent naming throughout the application.
+
+| Item | Convention | Example |
+|---|---|---|
+| Component | kebab-case | `customer-list` |
+| Service | kebab-case | `customer-service` |
+| Directive | kebab-case | `highlight` |
+| Pipe | kebab-case | `full-name` |
+| Guard | kebab-case | `auth-guard` |
+| Interceptor | kebab-case | `auth-interceptor` |
+| Folder | kebab-case | `customer-list` |
+| Class | PascalCase | `CustomerService` |
+| Interface | PascalCase | `Customer` |
+
+Examples:
 
 ```text
-angular-in-action
+customer-list/
+customer-service.ts
+auth-guard.ts
+auth-interceptor.ts
+full-name.ts
 ```
-
-Create and enter the directory:
-
-```bash
-mkdir angular-in-action
-cd angular-in-action
-```
-
-# Verify the Environment
-
-Run:
-
-```bash
-node --version
-npm --version
-ng version
-git --version
-```
-
-Example:
-
-```text
-Node.js       → 22.x.x
-NPM           → 10.x.x
-Angular CLI   → 21.x.x
-Git           → 2.x.x
-```
-
-# Useful Angular CLI Commands
-
-| Command | Purpose |
-|---|---|
-| `ng version` | Display Angular and CLI versions |
-| `ng help` | Display Angular CLI help |
-| `ng new` | Create a new Angular application |
-| `ng generate` | Generate Angular files |
-| `ng serve` | Start development server |
-| `ng build` | Build the application |
-| `ng test` | Run tests |
-
-# Environment Checklist
-
-- [ ] Node.js installed
-- [ ] NPM available
-- [ ] Angular CLI 21 available
-- [ ] Git installed
-- [ ] VS Code installed
-- [ ] Angular Language Service installed
-- [ ] ESLint available when required
-- [ ] Prettier available when required
 
 # Quick Revision
 
-| Command | Purpose |
+| Item | Purpose |
 |---|---|
-| `node --version` | Check Node.js |
-| `npm --version` | Check NPM |
-| `ng version` | Check Angular CLI |
-| `git --version` | Check Git |
-| `ng help` | Angular CLI help |
+| `public/` | Static assets |
+| `src/` | Application source code |
+| `src/app/` | Angular application code |
+| `app.ts` | Root component |
+| `app.html` | Root component template |
+| `app.css` | Root component styles |
+| `app.config.ts` | Application configuration |
+| `app.routes.ts` | Routing configuration |
+| `main.ts` | Application entry point |
+| `index.html` | Main browser HTML |
+| `styles.css` | Global styles |
+| `angular.json` | Angular CLI configuration |
+| `package.json` | Project metadata and dependencies |
+| `package-lock.json` | Exact dependency versions |
+| `tsconfig.json` | Base TypeScript configuration |
+| `core/` | Application-wide functionality |
+| `features/` | Feature-specific functionality |
+| `shared/` | Reusable functionality |
 
 # Key Takeaways
 
-- Node.js is required for Angular development.
-- NPM manages Angular packages and dependencies.
-- Angular CLI is used to create and manage Angular applications.
-- VS Code provides the development environment.
-- Angular Language Service provides Angular-specific editor support.
-- ESLint helps identify code-quality issues.
-- Prettier provides consistent code formatting.
-- Git manages source code and branches.
+- `src/` contains the application source code.
+- `src/app/` contains Angular application code.
+- `main.ts` is the application entry point.
+- `app.ts` is the root component.
+- `app.config.ts` contains application-wide configuration.
+- `app.routes.ts` contains routing configuration.
+- `features/` organizes business features.
+- `core/` contains application-wide functionality.
+- `shared/` contains reusable functionality.
+- Consistent naming and organization make Angular applications easier to maintain.
