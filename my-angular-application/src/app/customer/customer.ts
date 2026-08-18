@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
+import { CustomerCard } from './customer-card/customer-card';
 
 @Component({
   selector: 'app-customer',
-  imports: [],
+  imports: [CustomerCard],
   templateUrl: './customer.html',
-  styleUrl: './customer.css',
+  styleUrl: './customer.css'
 })
 export class Customer {
   name = 'Siraj';
@@ -12,5 +13,9 @@ export class Customer {
 
   getCustomerName(): string {
     return this.name;
+  }
+
+  onCustomerSelected(name: string): void {
+    console.log('Selected customer:', name);
   }
 }

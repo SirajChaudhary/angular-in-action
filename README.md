@@ -1,318 +1,355 @@
-# Lesson 5 — Components
+# Lesson 6 — Component Communication
 
-# What is a Component
+This lesson covers how Angular components communicate with each other.
 
-A component is the basic building block of an Angular application.
+We will focus on:
 
-A component controls a portion of the application's user interface.
+- Parent → Child communication
+- Child → Parent communication
+- `input()`
+- `output()`
+- Passing data to a child component
+- Sending events from a child component
+- Implementing both patterns in the current application
 
-A component generally consists of:
+# Parent and Child Components
 
-| File | Purpose |
-|---|---|
-| `.ts` | Component logic and metadata |
-| `.html` | Component template |
-| `.css` | Component-specific styles |
-| `.spec.ts` | Component tests |
+Consider this structure:
+
+```text
+App
+└── Customer
+    └── CustomerCard
+```
+
+Here:
+
+- `App` is the parent.
+- `Customer` is the child of `App`.
+- `CustomerCard` is the child of `Customer`.
+
+Angular provides component communication mechanisms for passing data and events between these components.
+
+# Communication Patterns
+
+| Direction | Purpose | Angular API |
+|---|---|---|
+| Parent → Child | Pass data to a child | `input()` |
+| Child → Parent | Send events to a parent | `output()` |
+
+The basic flow is:
+
+```text
+Parent
+   │
+   │ input()
+   ▼
+Child
+   │
+   │ output()
+   ▼
+Parent
+```
+
+# Parent → Child Communication
+
+A parent component can pass data to a child component using an input.
+
+Modern Angular provides the `input()` function for defining inputs.
+
+## Child Component
 
 Example:
 
-```text
-customer/
-├── customer.ts
-├── customer.html
-├── customer.css
-└── customer.spec.ts
-```
-
-# Component Architecture
-
-```text
-Component
-├── TypeScript
-│   ├── State
-│   └── Business logic
-│
-├── HTML
-│   └── User interface
-│
-├── CSS
-│   └── Component styles
-│
-└── Tests
-    └── Component tests
-```
-
-# Component Metadata
-
-The `@Component` decorator provides Angular with information about the component.
-
 ```typescript
+import { Component, input } from '@angular/core';
+
 @Component({
-  selector: 'app-customer',
-  imports: [],
-  templateUrl: './customer.html',
-  styleUrl: './customer.css'
+  selector: 'app-customer-card',
+  templateUrl: './customer-card.html'
 })
-```
-
-| Property | Purpose |
-|---|---|
-| `selector` | Defines the HTML element used to render the component |
-| `imports` | Defines dependencies used by the component |
-| `templateUrl` | Points to the component HTML template |
-| `styleUrl` | Points to the component stylesheet |
-
-# Selector
-
-The `selector` defines how the component is used in HTML.
-
-```typescript
-@Component({
-  selector: 'app-customer'
-})
-export class Customer {
+export class CustomerCard {
+  name = input<string>('');
 }
 ```
 
-The component can then be rendered using:
+The child can use the input in its template:
 
 ```html
-<app-customer></app-customer>
+<h3>Customer Card</h3>
+
+<p>Name: {{ name() }}</p>
 ```
 
-# Template
+## Parent Component
 
-The template defines the component's UI.
+The parent passes a value using property binding:
 
-## External Template
+```html
+<app-customer-card [name]="name"></app-customer-card>
+```
 
-A template can be stored in a separate HTML file.
+If the parent contains:
 
 ```typescript
+name = 'Siraj';
+```
+
+the child receives:
+
+```text
+Siraj
+```
+
+# Input Flow
+
+```text
+Customer
+   │
+   │ [name]="name"
+   ▼
+CustomerCard
+   │
+   │ name()
+   ▼
+Template
+```
+
+# Required Inputs
+
+An input can be required.
+
+```typescript
+name = input.required<string>();
+```
+
+The parent must provide the value:
+
+```html
+<app-customer-card [name]="name"></app-customer-card>
+```
+
+This is useful when a child component cannot work without a particular value.
+
+# Input with Default Value
+
+An input can have a default value:
+
+```typescript
+name = input<string>('Unknown');
+```
+
+If the parent does not provide a value, the child uses:
+
+```text
+Unknown
+```
+
+# Child → Parent Communication
+
+A child component can communicate with its parent using an output.
+
+Modern Angular provides the `output()` function.
+
+## Child Component
+
+```typescript
+import { Component, output } from '@angular/core';
+
 @Component({
-  selector: 'app-customer',
-  templateUrl: './customer.html'
+  selector: 'app-customer-card',
+  templateUrl: './customer-card.html'
 })
-export class Customer {
-  name = 'Siraj';
+export class CustomerCard {
+  customerSelected = output<string>();
+
+  selectCustomer(): void {
+    this.customerSelected.emit('Siraj');
+  }
+}
+```
+
+The child emits an event:
+
+```typescript
+this.customerSelected.emit('Siraj');
+```
+
+# Child Template
+
+```html
+<button (click)="selectCustomer()">
+  Select Customer
+</button>
+```
+
+# Parent Component
+
+The parent listens to the output event:
+
+```html
+<app-customer-card
+  (customerSelected)="onCustomerSelected($event)">
+</app-customer-card>
+```
+
+The `$event` contains the value emitted by the child.
+
+Parent TypeScript:
+
+```typescript
+onCustomerSelected(name: string): void {
+  console.log('Selected customer:', name);
+}
+```
+
+# Output Flow
+
+```text
+CustomerCard
+   │
+   │ emit('Siraj')
+   ▼
+customerSelected
+   │
+   ▼
+Customer
+   │
+   │ onCustomerSelected($event)
+   ▼
+Parent method
+```
+
+# Input and Output Together
+
+A child component can have both inputs and outputs.
+
+```typescript
+import { Component, input, output } from '@angular/core';
+
+@Component({
+  selector: 'app-customer-card',
+  templateUrl: './customer-card.html'
+})
+export class CustomerCard {
+
+  name = input<string>('');
+
+  customerSelected = output<string>();
+
+  selectCustomer(): void {
+    this.customerSelected.emit(this.name());
+  }
 }
 ```
 
 Template:
 
 ```html
-<h2>Customer</h2>
+<h3>Customer Card</h3>
 
-<p>{{ name }}</p>
+<p>Name: {{ name() }}</p>
+
+<button (click)="selectCustomer()">
+  Select Customer
+</button>
 ```
 
-The component class provides the data and the template displays it.
-
-## Inline Template
-
-A template can also be defined directly inside the component.
-
-```typescript
-@Component({
-  selector: 'app-customer',
-  template: `
-    <h2>Customer</h2>
-    <p>{{ name }}</p>
-  `
-})
-export class Customer {
-  name = 'Siraj';
-}
-```
-
-For larger components, an external HTML file is generally easier to maintain.
-
-# Component Styles
-
-Styles can be defined in a separate file.
-
-```typescript
-@Component({
-  selector: 'app-customer',
-  templateUrl: './customer.html',
-  styleUrl: './customer.css'
-})
-export class Customer {
-}
-```
-
-Example:
-
-```css
-h2 {
-  font-size: 24px;
-}
-```
-
-## Inline Styles
-
-Styles can also be defined directly inside the component.
-
-```typescript
-@Component({
-  selector: 'app-customer',
-  template: `<h2>Customer</h2>`,
-  styles: `
-    h2 {
-      font-size: 24px;
-    }
-  `
-})
-export class Customer {
-}
-```
-
-For larger components, external stylesheets are generally easier to maintain.
-
-# Standalone Components
-
-Modern Angular uses standalone components.
-
-A standalone component does not need to be declared inside an `NgModule`.
-
-Example:
-
-```typescript
-@Component({
-  selector: 'app-customer',
-  imports: [],
-  templateUrl: './customer.html',
-  styleUrl: './customer.css'
-})
-export class Customer {
-}
-```
-
-Angular 21 applications use the modern standalone approach.
-
-# Component Imports
-
-A component can import Angular features or other standalone components directly.
-
-Example:
-
-```typescript
-import { Component } from '@angular/core';
-import { CustomerCard } from '../customer-card/customer-card';
-
-@Component({
-  selector: 'app-customer-list',
-  imports: [CustomerCard],
-  templateUrl: './customer-list.html'
-})
-export class CustomerList {
-}
-```
-
-The imported component can then be used in the template:
+Parent:
 
 ```html
-<app-customer-card></app-customer-card>
+<app-customer-card
+  [name]="name"
+  (customerSelected)="onCustomerSelected($event)">
+</app-customer-card>
 ```
 
-# Recommended Component Organization
+# How to Implement Component Communication in the Current Application
 
-For a small example, a component can be created directly under `src/app`.
+We will update the existing `Customer` component and create a `CustomerCard` child component.
 
-For a real application, components should generally be organized by feature.
-
-Recommended structure:
+The final structure will be:
 
 ```text
 src/app/
-├── core/                       # Application-wide functionality
-├── features/                   # Feature-specific functionality
-│   └── customers/              # Customer feature
-└── shared/                     # Reusable functionality
-    └── components/             # Reusable components
+├── app.ts
+├── app.html
+├── app.css
+├── app.config.ts
+├── app.routes.ts
+└── customer/
+    ├── customer.ts
+    ├── customer.html
+    ├── customer.css
+    ├── customer.spec.ts
+    └── customer-card/
+        ├── customer-card.ts
+        ├── customer-card.html
+        ├── customer-card.css
+        └── customer-card.spec.ts
 ```
 
-Feature-specific components can be organized like:
-
-```text
-features/
-└── customers/
-    ├── customer-list/
-    ├── customer-detail/
-    └── customer-form/
-```
-
-Reusable components shared by multiple features should be placed under:
-
-```text
-shared/components/
-```
-
-# How to Create a Component in the Current Application
-
-We will create a `customer` component and render it from the root component.
-
-### Step 1: Create the Component
+### Step 1: Create the Child Component
 
 From the project root:
 
 ```bash
-ng g c customer
+ng g c customer/customer-card
 ```
 
 Angular CLI creates:
 
 ```text
-src/app/customer/
-├── customer.ts
-├── customer.html
-├── customer.css
-└── customer.spec.ts
+src/app/customer/customer-card/
+├── customer-card.ts
+├── customer-card.html
+├── customer-card.css
+└── customer-card.spec.ts
 ```
 
-### Step 2: Add the Component to the Root Component
+### Step 2: Create an Input
 
 Open:
 
 ```text
-src/app/app.ts
+src/app/customer/customer-card/customer-card.ts
 ```
 
 Update it:
 
 ```typescript
-import { Component, signal } from '@angular/core';
-import { Customer } from './customer/customer';
+import { Component, input } from '@angular/core';
 
 @Component({
-  selector: 'app-root',
-  imports: [Customer],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  selector: 'app-customer-card',
+  imports: [],
+  templateUrl: './customer-card.html',
+  styleUrl: './customer-card.css'
 })
-export class App {
-  protected readonly title = signal('my-angular-application');
+export class CustomerCard {
+  name = input<string>('');
+  email = input<string>('');
 }
 ```
 
-### Step 3: Render the Component
+### Step 3: Display the Input Values
 
 Open:
 
 ```text
-src/app/app.html
+src/app/customer/customer-card/customer-card.html
 ```
 
 Add:
 
 ```html
-<h1>My Angular Application</h1>
+<h3>Customer Card</h3>
 
-<app-customer></app-customer>
+<p>Name: {{ name() }}</p>
+<p>Email: {{ email() }}</p>
 ```
 
-### Step 4: Add Component Logic
+### Step 4: Import the Child Component
 
 Open:
 
@@ -324,10 +361,11 @@ Update:
 
 ```typescript
 import { Component } from '@angular/core';
+import { CustomerCard } from './customer-card/customer-card';
 
 @Component({
   selector: 'app-customer',
-  imports: [],
+  imports: [CustomerCard],
   templateUrl: './customer.html',
   styleUrl: './customer.css'
 })
@@ -341,7 +379,7 @@ export class Customer {
 }
 ```
 
-### Step 5: Update the Component Template
+### Step 5: Pass Data from Parent to Child
 
 Open:
 
@@ -357,29 +395,151 @@ Add:
 <p>Name: {{ name }}</p>
 <p>Email: {{ email }}</p>
 <p>Customer: {{ getCustomerName() }}</p>
+
+<app-customer-card
+  [name]="name"
+  [email]="email">
+</app-customer-card>
 ```
 
-### Step 6: Add Component Styles
+The parent now passes:
+
+```text
+name
+email
+```
+
+to the child component.
+
+### Step 6: Create an Output
 
 Open:
 
 ```text
-src/app/customer/customer.css
+src/app/customer/customer-card/customer-card.ts
+```
+
+Update it:
+
+```typescript
+import { Component, input, output } from '@angular/core';
+
+@Component({
+  selector: 'app-customer-card',
+  imports: [],
+  templateUrl: './customer-card.html',
+  styleUrl: './customer-card.css'
+})
+export class CustomerCard {
+  name = input<string>('');
+  email = input<string>('');
+
+  customerSelected = output<string>();
+
+  selectCustomer(): void {
+    this.customerSelected.emit(this.name());
+  }
+}
+```
+
+### Step 7: Add the Child Button
+
+Open:
+
+```text
+src/app/customer/customer-card/customer-card.html
+```
+
+Update:
+
+```html
+<h3>Customer Card</h3>
+
+<p>Name: {{ name() }}</p>
+<p>Email: {{ email() }}</p>
+
+<button (click)="selectCustomer()">
+  Select Customer
+</button>
+```
+
+### Step 8: Listen to the Output in the Parent
+
+Open:
+
+```text
+src/app/customer/customer.ts
 ```
 
 Add:
 
-```css
-h2 {
-  margin-bottom: 8px;
-}
-
-p {
-  margin: 4px 0;
+```typescript
+onCustomerSelected(name: string): void {
+  console.log('Selected customer:', name);
 }
 ```
 
-### Step 7: Run the Application
+The complete class becomes:
+
+```typescript
+import { Component } from '@angular/core';
+import { CustomerCard } from './customer-card/customer-card';
+
+@Component({
+  selector: 'app-customer',
+  imports: [CustomerCard],
+  templateUrl: './customer.html',
+  styleUrl: './customer.css'
+})
+export class Customer {
+  name = 'Siraj';
+  email = 'siraj@example.com';
+
+  getCustomerName(): string {
+    return this.name;
+  }
+
+  onCustomerSelected(name: string): void {
+    console.log('Selected customer:', name);
+  }
+}
+```
+
+### Step 9: Bind the Output Event
+
+Open:
+
+```text
+src/app/customer/customer.html
+```
+
+Update the child component:
+
+```html
+<app-customer-card
+  [name]="name"
+  [email]="email"
+  (customerSelected)="onCustomerSelected($event)">
+</app-customer-card>
+```
+
+Complete template:
+
+```html
+<h2>Customer Details</h2>
+
+<p>Name: {{ name }}</p>
+<p>Email: {{ email }}</p>
+<p>Customer: {{ getCustomerName() }}</p>
+
+<app-customer-card
+  [name]="name"
+  [email]="email"
+  (customerSelected)="onCustomerSelected($event)">
+</app-customer-card>
+```
+
+### Step 10: Run the Application
 
 From the project root:
 
@@ -393,7 +553,7 @@ Open:
 http://localhost:4200
 ```
 
-Expected output:
+You should see:
 
 ```text
 My Angular Application
@@ -402,92 +562,78 @@ Customer Details
 Name: Siraj
 Email: siraj@example.com
 Customer: Siraj
+
+Customer Card
+Name: Siraj
+Email: siraj@example.com
+
+[ Select Customer ]
 ```
 
-### Step 8: Verify the Structure
+Click:
 
 ```text
-src/app/
-├── app.ts
-├── app.html
-├── app.css
-├── app.config.ts
-├── app.routes.ts
-└── customer/
-    ├── customer.ts
-    ├── customer.html
-    ├── customer.css
-    └── customer.spec.ts
+Select Customer
 ```
 
-<img width="3840" height="676" alt="image" src="https://github.com/user-attachments/assets/1879209f-5e47-4d1e-8729-cc3ad3b28381" />
+Then open the browser developer console.
 
-# Component Flow
-
-The application now has this structure:
+You should see:
 
 ```text
-App
- │
- └── Customer
-      ├── customer.ts
-      ├── customer.html
-      └── customer.css
+Selected customer: Siraj
 ```
 
-Rendering flow:
+<img width="3840" height="1356" alt="image" src="https://github.com/user-attachments/assets/6b3cc758-a46b-48ee-9010-78e8f52c72f8" />
+
+# Communication Flow in the Current Application
 
 ```text
-app.html
-   ↓
-<app-customer>
-   ↓
-Customer component
-   ↓
-customer.html
-   ↓
-Customer template rendered
+Customer
+   │
+   │ [name]="name"
+   │ [email]="email"
+   ▼
+CustomerCard
+   │
+   │ customerSelected.emit(...)
+   ▼
+Customer
+   │
+   ▼
+onCustomerSelected($event)
 ```
 
-# Component Best Practices
+# Best Practices
 
-- Use Angular CLI to generate components.
-- Keep component files together in their component folder.
-- Organize feature-specific components under `features/`.
-- Place reusable components under `shared/components/`.
-- Use meaningful component names.
-- Prefer external templates and stylesheets for larger components.
-- Keep component classes focused on UI-related behavior.
-- Keep reusable or complex business logic in services.
-- Keep component templates reasonably small.
-- Use standalone components and direct `imports` in modern Angular applications.
+- Use `input()` for parent-to-child data.
+- Use `output()` for child-to-parent events.
+- Use meaningful input and output names.
+- Keep inputs focused on data required by the child.
+- Keep outputs focused on events originating from the child.
+- Avoid directly modifying parent state from a child.
+- Use services for communication between unrelated components.
+- Use shared state solutions when communication becomes more complex.
 
 # Quick Revision
 
 | Concept | Example |
 |---|---|
-| Generate component | `ng g c customer` |
-| Component class | `export class Customer {}` |
-| Component decorator | `@Component({...})` |
-| Selector | `app-customer` |
-| External template | `templateUrl: './customer.html'` |
-| Inline template | `template: \`...\`` |
-| External styles | `styleUrl: './customer.css'` |
-| Inline styles | `styles: \`...\`` |
-| Component imports | `imports: [CustomerCard]` |
-| Render component | `<app-customer></app-customer>` |
-| Standalone component | Modern Angular component |
+| Input | `name = input<string>('')` |
+| Required input | `name = input.required<string>()` |
+| Output | `customerSelected = output<string>()` |
+| Pass input | `[name]="name"` |
+| Listen to output | `(customerSelected)="..."` |
+| Emit event | `customerSelected.emit(...)` |
+| Event value | `$event` |
 
 # Key Takeaways
 
-- Components are the basic building blocks of Angular applications.
-- A component contains TypeScript, a template and styles.
-- `@Component` defines Angular component metadata.
-- The selector determines how a component is rendered.
-- Templates can be external or inline.
-- Styles can be external or inline.
-- External templates and stylesheets are generally easier to maintain for larger components.
-- Modern Angular uses standalone components.
-- Standalone components can directly import other components and Angular features.
-- Feature-specific components should be organized under `features/`.
-- Reusable components should be placed under `shared/components/`.
+- Components can communicate with their parent and child components.
+- `input()` is used for parent-to-child data.
+- `output()` is used for child-to-parent events.
+- Property binding passes values to inputs.
+- Event binding listens to outputs.
+- `$event` contains the value emitted by an output.
+- A child component should communicate with its parent through defined inputs and outputs rather than directly accessing the parent's properties.
+- Services are better suited for communication between unrelated components.
