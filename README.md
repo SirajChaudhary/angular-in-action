@@ -1,355 +1,310 @@
-# Lesson 6 — Component Communication
+# Lesson 7 — Data Binding
 
-This lesson covers how Angular components communicate with each other.
+# What is Data Binding
 
-We will focus on:
+Data binding connects the component class with its HTML template.
 
-- Parent → Child communication
-- Child → Parent communication
-- `input()`
-- `output()`
-- Passing data to a child component
-- Sending events from a child component
-- Implementing both patterns in the current application
+It allows Angular to:
 
-# Parent and Child Components
+- Display component data in the UI.
+- Set HTML element properties.
+- Listen for user events.
+- Synchronize data between the component and the UI.
 
-Consider this structure:
+# Data Binding Types
 
-```text
-App
-└── Customer
-    └── CustomerCard
+1. Interpolation
+2. Property binding
+3. Attribute binding
+4. Event binding
+5. Two-way binding
+
+| Binding | Direction | Syntax | Purpose |
+|---|---|---|---|
+| Interpolation | Component → Template | `{{ value }}` | Display data |
+| Property binding | Component → Template | `[property]="value"` | Set DOM/component properties |
+| Attribute binding | Component → Template | `[attr.name]="value"` | Set HTML attributes |
+| Event binding | Template → Component | `(event)="method()"` | Respond to events |
+| Two-way binding | Component ↔ Template | `[(ngModel)]="value"` | Synchronize data |
+
+# 1. Interpolation
+
+Interpolation displays component data inside the template.
+
+Syntax:
+
+```html
+{{ expression }}
 ```
-
-Here:
-
-- `App` is the parent.
-- `Customer` is the child of `App`.
-- `CustomerCard` is the child of `Customer`.
-
-Angular provides component communication mechanisms for passing data and events between these components.
-
-# Communication Patterns
-
-| Direction | Purpose | Angular API |
-|---|---|---|
-| Parent → Child | Pass data to a child | `input()` |
-| Child → Parent | Send events to a parent | `output()` |
-
-The basic flow is:
-
-```text
-Parent
-   │
-   │ input()
-   ▼
-Child
-   │
-   │ output()
-   ▼
-Parent
-```
-
-# Parent → Child Communication
-
-A parent component can pass data to a child component using an input.
-
-Modern Angular provides the `input()` function for defining inputs.
-
-## Child Component
 
 Example:
 
 ```typescript
-import { Component, input } from '@angular/core';
-
-@Component({
-  selector: 'app-customer-card',
-  templateUrl: './customer-card.html'
-})
-export class CustomerCard {
-  name = input<string>('');
-}
-```
-
-The child can use the input in its template:
-
-```html
-<h3>Customer Card</h3>
-
-<p>Name: {{ name() }}</p>
-```
-
-## Parent Component
-
-The parent passes a value using property binding:
-
-```html
-<app-customer-card [name]="name"></app-customer-card>
-```
-
-If the parent contains:
-
-```typescript
-name = 'Siraj';
-```
-
-the child receives:
-
-```text
-Siraj
-```
-
-# Input Flow
-
-```text
-Customer
-   │
-   │ [name]="name"
-   ▼
-CustomerCard
-   │
-   │ name()
-   ▼
-Template
-```
-
-# Required Inputs
-
-An input can be required.
-
-```typescript
-name = input.required<string>();
-```
-
-The parent must provide the value:
-
-```html
-<app-customer-card [name]="name"></app-customer-card>
-```
-
-This is useful when a child component cannot work without a particular value.
-
-# Input with Default Value
-
-An input can have a default value:
-
-```typescript
-name = input<string>('Unknown');
-```
-
-If the parent does not provide a value, the child uses:
-
-```text
-Unknown
-```
-
-# Child → Parent Communication
-
-A child component can communicate with its parent using an output.
-
-Modern Angular provides the `output()` function.
-
-## Child Component
-
-```typescript
-import { Component, output } from '@angular/core';
-
-@Component({
-  selector: 'app-customer-card',
-  templateUrl: './customer-card.html'
-})
-export class CustomerCard {
-  customerSelected = output<string>();
-
-  selectCustomer(): void {
-    this.customerSelected.emit('Siraj');
-  }
-}
-```
-
-The child emits an event:
-
-```typescript
-this.customerSelected.emit('Siraj');
-```
-
-# Child Template
-
-```html
-<button (click)="selectCustomer()">
-  Select Customer
-</button>
-```
-
-# Parent Component
-
-The parent listens to the output event:
-
-```html
-<app-customer-card
-  (customerSelected)="onCustomerSelected($event)">
-</app-customer-card>
-```
-
-The `$event` contains the value emitted by the child.
-
-Parent TypeScript:
-
-```typescript
-onCustomerSelected(name: string): void {
-  console.log('Selected customer:', name);
-}
-```
-
-# Output Flow
-
-```text
-CustomerCard
-   │
-   │ emit('Siraj')
-   ▼
-customerSelected
-   │
-   ▼
-Customer
-   │
-   │ onCustomerSelected($event)
-   ▼
-Parent method
-```
-
-# Input and Output Together
-
-A child component can have both inputs and outputs.
-
-```typescript
-import { Component, input, output } from '@angular/core';
-
-@Component({
-  selector: 'app-customer-card',
-  templateUrl: './customer-card.html'
-})
-export class CustomerCard {
-
-  name = input<string>('');
-
-  customerSelected = output<string>();
-
-  selectCustomer(): void {
-    this.customerSelected.emit(this.name());
-  }
+export class Customer {
+  name = 'Siraj';
 }
 ```
 
 Template:
 
 ```html
-<h3>Customer Card</h3>
+<p>Name: {{ name }}</p>
+```
 
-<p>Name: {{ name() }}</p>
+Output:
 
+```text
+Name: Siraj
+```
+
+## Interpolation with Expressions
+
+Interpolation can also evaluate expressions.
+
+```html
+<p>{{ name.toUpperCase() }}</p>
+```
+
+You can also use simple calculations:
+
+```html
+<p>Total: {{ price * quantity }}</p>
+```
+
+Example:
+
+```typescript
+price = 500;
+quantity = 2;
+```
+
+Output:
+
+```text
+Total: 1000
+```
+
+# 2. Property Binding
+
+Property binding sets a DOM property using component data.
+
+Syntax:
+
+```html
+[property]="expression"
+```
+
+Example:
+
+```typescript
+isDisabled = true;
+```
+
+Template:
+
+```html
+<button [disabled]="isDisabled">
+  Select Customer
+</button>
+```
+
+When `isDisabled` is `true`, the button is disabled.
+
+When it becomes `false`, the button becomes enabled.
+
+# Property Binding vs Interpolation
+
+Both can sometimes produce similar visible results, but they are not the same.
+
+### Interpolation
+
+```html
+<img src="{{ imageUrl }}">
+```
+
+### Property Binding
+
+```html
+<img [src]="imageUrl">
+```
+
+Property binding directly binds to the DOM property.
+
+For DOM properties, prefer property binding when you are explicitly binding a property.
+
+# Common Property Bindings
+
+| Property | Example |
+|---|---|
+| `disabled` | `[disabled]="isDisabled"` |
+| `value` | `[value]="name"` |
+| `src` | `[src]="imageUrl"` |
+| `checked` | `[checked]="isSelected"` |
+| `hidden` | `[hidden]="isHidden"` |
+| `className` | `[className]="customerClass"` |
+
+# 3. Attribute Binding
+
+Attribute binding is used when you need to bind an HTML attribute.
+
+Syntax:
+
+```html
+[attr.attribute]="expression"
+```
+
+Example:
+
+```html
+<td [attr.colspan]="columnSpan">
+  Customer Details
+</td>
+```
+
+Component:
+
+```typescript
+columnSpan = 2;
+```
+
+The resulting HTML attribute is:
+
+```html
+<td colspan="2">
+```
+
+# Property vs Attribute Binding
+
+| Property Binding | Attribute Binding |
+|---|---|
+| `[disabled]` | `[attr.aria-label]` |
+| Works with DOM properties | Works with HTML attributes |
+| `[value]` | `[attr.colspan]` |
+| `[checked]` | `[attr.data-id]` |
+
+# 4. Event Binding
+
+Event binding allows the template to respond to events and call component methods.
+
+Syntax:
+
+```html
+(event)="method()"
+```
+
+Example:
+
+```html
 <button (click)="selectCustomer()">
   Select Customer
 </button>
 ```
 
-Parent:
+Component:
+
+```typescript
+selectCustomer(): void {
+  console.log('Customer selected');
+}
+```
+
+# Event Object
+
+Angular can provide the browser event object.
 
 ```html
-<app-customer-card
-  [name]="name"
-  (customerSelected)="onCustomerSelected($event)">
-</app-customer-card>
+<input (input)="onInput($event)">
 ```
 
-# How to Implement Component Communication in the Current Application
+Component:
 
-We will update the existing `Customer` component and create a `CustomerCard` child component.
+```typescript
+onInput(event: Event): void {
+  const input = event.target as HTMLInputElement;
 
-The final structure will be:
-
-```text
-src/app/
-├── app.ts
-├── app.html
-├── app.css
-├── app.config.ts
-├── app.routes.ts
-└── customer/
-    ├── customer.ts
-    ├── customer.html
-    ├── customer.css
-    ├── customer.spec.ts
-    └── customer-card/
-        ├── customer-card.ts
-        ├── customer-card.html
-        ├── customer-card.css
-        └── customer-card.spec.ts
+  console.log(input.value);
+}
 ```
 
-### Step 1: Create the Child Component
+# Common Events
 
-From the project root:
+| Event | Example |
+|---|---|
+| `click` | `(click)="save()"` |
+| `input` | `(input)="onInput($event)"` |
+| `change` | `(change)="onChange($event)"` |
+| `keyup` | `(keyup)="onKeyUp($event)"` |
+| `keydown` | `(keydown)="onKeyDown($event)"` |
+| `mouseover` | `(mouseover)="onMouseOver()"` |
+| `mouseleave` | `(mouseleave)="onMouseLeave()"` |
+
+# 5. Two-Way Binding
+
+Two-way binding synchronizes data between the component and the template.
+
+Syntax:
+
+```html
+[(ngModel)]="property"
+```
+
+It combines property binding and event binding.
+
+# Using ngModel
+
+Angular's `ngModel` directive is provided by `FormsModule`.
+
+Import it into a standalone component:
+
+```typescript
+import { FormsModule } from '@angular/forms';
+
+@Component({
+  selector: 'app-customer',
+  imports: [FormsModule],
+  templateUrl: './customer.html'
+})
+export class Customer {
+  name = 'Siraj';
+}
+```
+
+Template:
+
+```html
+<input [(ngModel)]="name">
+
+<p>Name: {{ name }}</p>
+```
+
+# Two-Way Binding Concept
+
+This:
+
+```html
+<input [(ngModel)]="name">
+```
+
+can be understood conceptually as:
+
+```html
+<input
+  [ngModel]="name"
+  (ngModelChange)="name = $event">
+```
+
+# How to Implement Data Binding in the Current Application
+
+Create/use **initial Angular project skeleton** and create the `customer` component.
 
 ```bash
-ng g c customer/customer-card
+ng new my-angular-application
+ng g c customer
 ```
 
-Angular CLI creates:
+Then implement the data-binding concepts step by step.
 
-```text
-src/app/customer/customer-card/
-├── customer-card.ts
-├── customer-card.html
-├── customer-card.css
-└── customer-card.spec.ts
-```
-
-### Step 2: Create an Input
-
-Open:
-
-```text
-src/app/customer/customer-card/customer-card.ts
-```
-
-Update it:
-
-```typescript
-import { Component, input } from '@angular/core';
-
-@Component({
-  selector: 'app-customer-card',
-  imports: [],
-  templateUrl: './customer-card.html',
-  styleUrl: './customer-card.css'
-})
-export class CustomerCard {
-  name = input<string>('');
-  email = input<string>('');
-}
-```
-
-### Step 3: Display the Input Values
-
-Open:
-
-```text
-src/app/customer/customer-card/customer-card.html
-```
-
-Add:
-
-```html
-<h3>Customer Card</h3>
-
-<p>Name: {{ name() }}</p>
-<p>Email: {{ email() }}</p>
-```
-
-### Step 4: Import the Child Component
+### Step 1: Open the Customer Component
 
 Open:
 
@@ -357,15 +312,15 @@ Open:
 src/app/customer/customer.ts
 ```
 
-Update:
+Update it:
 
 ```typescript
 import { Component } from '@angular/core';
-import { CustomerCard } from './customer-card/customer-card';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-customer',
-  imports: [CustomerCard],
+  imports: [FormsModule],
   templateUrl: './customer.html',
   styleUrl: './customer.css'
 })
@@ -373,13 +328,67 @@ export class Customer {
   name = 'Siraj';
   email = 'siraj@example.com';
 
-  getCustomerName(): string {
-    return this.name;
+  isActive = true;
+  isDisabled = true;
+
+  imageUrl = 'http://www.sirajchaudhary.com/assets/img/sirajchaudhary.jpg';
+
+  columnSpan = 2;
+
+  selectCustomer(): void {
+    console.log('Customer selected:', this.name);
+  }
+
+  onInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+
+    console.log('Input value:', input.value);
   }
 }
 ```
 
-### Step 5: Pass Data from Parent to Child
+### Step 2: Add the Customer Component to the Root Component
+
+Open:
+
+```text
+src/app/app.ts
+```
+
+Import the `Customer` component:
+
+```typescript
+import { Component, signal } from '@angular/core';
+import { Customer } from './customer/customer';
+
+@Component({
+  selector: 'app-root',
+  imports: [Customer],
+  templateUrl: './app.html',
+  styleUrl: './app.css'
+})
+export class App {
+  protected readonly title = signal('my-angular-application');
+}
+```
+
+### Step 3: Render the Customer Component
+
+Open:
+
+```text
+src/app/app.html
+```
+
+Add:
+
+```html
+<h1>My Angular Application</h1>
+
+<app-customer></app-customer>
+```
+
+### Step 4: Add Interpolation
 
 Open:
 
@@ -390,156 +399,144 @@ src/app/customer/customer.html
 Add:
 
 ```html
-<h2>Customer Details</h2>
+<h2>Interpolation</h2>
 
 <p>Name: {{ name }}</p>
 <p>Email: {{ email }}</p>
-<p>Customer: {{ getCustomerName() }}</p>
-
-<app-customer-card
-  [name]="name"
-  [email]="email">
-</app-customer-card>
+<p>Uppercase: {{ name.toUpperCase() }}</p>
 ```
 
-The parent now passes:
+### Step 5: Add Property Binding
 
-```text
-name
-email
-```
-
-to the child component.
-
-### Step 6: Create an Output
-
-Open:
-
-```text
-src/app/customer/customer-card/customer-card.ts
-```
-
-Update it:
-
-```typescript
-import { Component, input, output } from '@angular/core';
-
-@Component({
-  selector: 'app-customer-card',
-  imports: [],
-  templateUrl: './customer-card.html',
-  styleUrl: './customer-card.css'
-})
-export class CustomerCard {
-  name = input<string>('');
-  email = input<string>('');
-
-  customerSelected = output<string>();
-
-  selectCustomer(): void {
-    this.customerSelected.emit(this.name());
-  }
-}
-```
-
-### Step 7: Add the Child Button
-
-Open:
-
-```text
-src/app/customer/customer-card/customer-card.html
-```
-
-Update:
+Add:
 
 ```html
-<h3>Customer Card</h3>
+<h2>Property Binding</h2>
 
-<p>Name: {{ name() }}</p>
-<p>Email: {{ email() }}</p>
+<button [disabled]="isDisabled">
+  Disabled Button
+</button>
+
+<img
+  [src]="imageUrl"
+  [alt]="name">
+```
+
+### Step 6: Add Attribute Binding
+
+Add:
+
+```html
+<h2>Attribute Binding</h2>
+
+<button [attr.aria-label]="'Select ' + name">
+  Select Customer
+</button>
+
+<table border="1">
+  <tr>
+    <td [attr.colspan]="columnSpan">
+      Customer Details
+    </td>
+  </tr>
+</table>
+```
+
+### Step 7: Add Event Binding
+
+Add:
+
+```html
+<h2>Event Binding</h2>
 
 <button (click)="selectCustomer()">
   Select Customer
 </button>
 ```
 
-### Step 8: Listen to the Output in the Parent
-
-Open:
-
-```text
-src/app/customer/customer.ts
-```
+### Step 8: Add Event Object
 
 Add:
 
-```typescript
-onCustomerSelected(name: string): void {
-  console.log('Selected customer:', name);
-}
+```html
+<input
+  [value]="name"
+  (input)="onInput($event)">
 ```
 
-The complete class becomes:
+### Step 9: Add Two-Way Binding
 
-```typescript
-import { Component } from '@angular/core';
-import { CustomerCard } from './customer-card/customer-card';
+Add:
 
-@Component({
-  selector: 'app-customer',
-  imports: [CustomerCard],
-  templateUrl: './customer.html',
-  styleUrl: './customer.css'
-})
-export class Customer {
-  name = 'Siraj';
-  email = 'siraj@example.com';
+```html
+<h2>Two-Way Binding</h2>
 
-  getCustomerName(): string {
-    return this.name;
-  }
+<input [(ngModel)]="name">
 
-  onCustomerSelected(name: string): void {
-    console.log('Selected customer:', name);
-  }
-}
+<p>Current Name: {{ name }}</p>
 ```
 
-### Step 9: Bind the Output Event
+### Step 10: Complete Customer Template
 
-Open:
+The complete:
 
 ```text
 src/app/customer/customer.html
 ```
 
-Update the child component:
-
-```html
-<app-customer-card
-  [name]="name"
-  [email]="email"
-  (customerSelected)="onCustomerSelected($event)">
-</app-customer-card>
-```
-
-Complete template:
+can now be:
 
 ```html
 <h2>Customer Details</h2>
 
+<h2>Interpolation</h2>
+
 <p>Name: {{ name }}</p>
 <p>Email: {{ email }}</p>
-<p>Customer: {{ getCustomerName() }}</p>
+<p>Uppercase: {{ name.toUpperCase() }}</p>
 
-<app-customer-card
-  [name]="name"
-  [email]="email"
-  (customerSelected)="onCustomerSelected($event)">
-</app-customer-card>
+<h2>Property Binding</h2>
+
+<button [disabled]="isDisabled">
+  Disabled Button
+</button>
+
+<img
+  [src]="imageUrl"
+  [alt]="name">
+
+<h2>Attribute Binding</h2>
+
+<button [attr.aria-label]="'Select ' + name">
+  Select Customer
+</button>
+
+<table border="1">
+  <tr>
+    <td [attr.colspan]="columnSpan">
+      Customer Details
+    </td>
+  </tr>
+</table>
+
+<h2>Event Binding</h2>
+
+<button (click)="selectCustomer()">
+  Select Customer
+</button>
+
+<input
+  [value]="name"
+  (input)="onInput($event)">
+
+<h2>Two-Way Binding</h2>
+
+<input [(ngModel)]="name">
+
+<p>Current Name: {{ name }}</p>
 ```
 
-### Step 10: Run the Application
+# Run the Application
 
 From the project root:
 
@@ -553,87 +550,108 @@ Open:
 http://localhost:4200
 ```
 
-You should see:
+<img width="3840" height="2076" alt="image" src="https://github.com/user-attachments/assets/e717952c-6282-4805-9acd-15ddf5a141da" />
+
+# Test Each Binding
+
+| Example | Test |
+|---|---|
+| Interpolation | Observe the displayed values |
+| Property binding | Change `isDisabled` |
+| Attribute binding | Inspect the HTML |
+| Event binding | Click the button |
+| Input event | Type into the first input |
+| Two-way binding | Change the name |
+| Image binding | Observe the image |
+
+# Observe Two-Way Binding
+
+Initially:
 
 ```text
-My Angular Application
-
-Customer Details
-Name: Siraj
-Email: siraj@example.com
-Customer: Siraj
-
-Customer Card
-Name: Siraj
-Email: siraj@example.com
-
-[ Select Customer ]
+name = "Siraj"
 ```
 
-Click:
+The UI shows:
 
 ```text
-Select Customer
+Current Name: Siraj
 ```
 
-Then open the browser developer console.
-
-You should see:
+Change the input to:
 
 ```text
-Selected customer: Siraj
+Ahmed
 ```
 
-<img width="3840" height="1356" alt="image" src="https://github.com/user-attachments/assets/6b3cc758-a46b-48ee-9010-78e8f52c72f8" />
-
-# Communication Flow in the Current Application
+The component property becomes:
 
 ```text
-Customer
-   │
-   │ [name]="name"
-   │ [email]="email"
-   ▼
-CustomerCard
-   │
-   │ customerSelected.emit(...)
-   ▼
-Customer
-   │
-   ▼
-onCustomerSelected($event)
+name = "Ahmed"
+```
+
+and the paragraph automatically becomes:
+
+```text
+Current Name: Ahmed
+```
+
+# Data Binding Summary
+
+```text
+                    Angular Component
+                           │
+             ┌─────────────┼─────────────┐
+             │             │             │
+             ▼             ▼             ▼
+       Interpolation   Property      Attribute
+             │         Binding        Binding
+             │             │             │
+             └─────────────┼─────────────┘
+                           ▼
+                        Template
+                           │
+                           │
+                    Event Binding
+                           │
+                           ▼
+                      Component
+
+                 Two-Way Binding
+                    Component
+                       ↕
+                    Template
 ```
 
 # Best Practices
 
-- Use `input()` for parent-to-child data.
-- Use `output()` for child-to-parent events.
-- Use meaningful input and output names.
-- Keep inputs focused on data required by the child.
-- Keep outputs focused on events originating from the child.
-- Avoid directly modifying parent state from a child.
-- Use services for communication between unrelated components.
-- Use shared state solutions when communication becomes more complex.
+- Use interpolation primarily to display values.
+- Use property binding when binding to DOM or component properties.
+- Use attribute binding for HTML attributes such as ARIA and custom attributes.
+- Use event binding to respond to user actions.
+- Use two-way binding when the UI and component state need to stay synchronized.
+- Keep event handlers small and focused.
+- Prefer explicit property binding instead of interpolation when binding DOM properties.
+- Avoid putting complex business logic directly inside templates.
+- Use services when business logic becomes reusable or complex.
 
 # Quick Revision
 
-| Concept | Example |
-|---|---|
-| Input | `name = input<string>('')` |
-| Required input | `name = input.required<string>()` |
-| Output | `customerSelected = output<string>()` |
-| Pass input | `[name]="name"` |
-| Listen to output | `(customerSelected)="..."` |
-| Emit event | `customerSelected.emit(...)` |
-| Event value | `$event` |
+| Concept | Syntax | Direction |
+|---|---|---|
+| Interpolation | `{{ name }}` | Component → Template |
+| Property binding | `[disabled]="isDisabled"` | Component → Template |
+| Attribute binding | `[attr.aria-label]="label"` | Component → Template |
+| Event binding | `(click)="selectCustomer()"` | Template → Component |
+| Two-way binding | `[(ngModel)]="name"` | Component ↔ Template |
 
 # Key Takeaways
 
-- Components can communicate with their parent and child components.
-- `input()` is used for parent-to-child data.
-- `output()` is used for child-to-parent events.
-- Property binding passes values to inputs.
-- Event binding listens to outputs.
-- `$event` contains the value emitted by an output.
-- A child component should communicate with its parent through defined inputs and outputs rather than directly accessing the parent's properties.
-- Services are better suited for communication between unrelated components.
+- Data binding connects Angular component data with the template.
+- Interpolation displays component values.
+- Property binding sets DOM or component properties.
+- Attribute binding sets HTML attributes.
+- Event binding responds to user actions.
+- Two-way binding synchronizes component state and the UI.
+- `FormsModule` is required when using `[(ngModel)]`.
+- Angular provides different binding mechanisms for different communication directions.

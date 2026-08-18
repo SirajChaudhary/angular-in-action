@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
-import { CustomerCard } from './customer-card/customer-card';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-customer',
-  imports: [CustomerCard],
+  imports: [FormsModule],
   templateUrl: './customer.html',
   styleUrl: './customer.css'
 })
@@ -11,11 +11,19 @@ export class Customer {
   name = 'Siraj';
   email = 'siraj@example.com';
 
-  getCustomerName(): string {
-    return this.name;
+  isDisabled = true;
+
+  imageUrl = 'http://www.sirajchaudhary.com/assets/img/sirajchaudhary.jpg';
+
+  columnSpan = 2;
+
+  selectCustomer(): void {
+    console.log('Customer selected:', this.name);
   }
 
-  onCustomerSelected(name: string): void {
-    console.log('Selected customer:', name);
+  onInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+
+    console.log('Input value:', input.value);
   }
 }
