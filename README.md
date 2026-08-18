@@ -1,511 +1,233 @@
-# Lesson 2 — TypeScript
+# Lesson 3 — Angular Environment Setup
 
-# What is TypeScript
+# Prerequisites
 
-TypeScript is a strongly typed programming language developed by Microsoft and built on top of JavaScript.
-
-- TypeScript is a superset of JavaScript.
-- TypeScript code is compiled to JavaScript.
-- Angular applications are primarily written in TypeScript.
-- TypeScript provides static typing and modern language features.
-- TypeScript helps identify many errors during development.
-
-```text
-TypeScript
-    ↓
-TypeScript Compiler
-    ↓
-JavaScript
-    ↓
-Browser
-```
-
-# TypeScript vs JavaScript
-
-| Feature | TypeScript | JavaScript |
-|---|---|---|
-| Static typing | Yes | No |
-| Type inference | Yes | Limited |
-| Interfaces | Yes | No |
-| Generics | Yes | No |
-| Access modifiers | Yes | No |
-| Compile-time checking | Yes | No |
-| Runs directly in browser | No | Yes |
-| Used by Angular | Yes | Yes |
-
-# Type Annotations
-
-A type annotation explicitly defines the type of a variable.
-
-```typescript
-let name: string = 'Siraj';
-let age: number = 43;
-let active: boolean = true;
-```
-
-# Type Inference
-
-TypeScript can automatically determine the type from the assigned value.
-
-```typescript
-let name = 'Siraj';
-let age = 43;
-let active = true;
-```
-
-TypeScript infers:
-
-```text
-name   → string
-age    → number
-active → boolean
-```
-
-# Arrays
-
-```typescript
-let names: string[] = ['Siraj', 'Ahmed', 'John'];
-let ids: number[] = [1, 2, 3];
-```
-
-Another syntax:
-
-```typescript
-let names: Array<string> = ['Siraj', 'Ahmed'];
-```
-
-# Objects
-
-```typescript
-let customer: {
-  id: number;
-  name: string;
-  active: boolean;
-} = {
-  id: 1,
-  name: 'Siraj',
-  active: true
-};
-```
-
-For reusable object structures, interfaces are preferred.
-
-# Interfaces
-
-An interface defines the structure of an object.
-
-```typescript
-interface Customer {
-  id: number;
-  name: string;
-  email: string;
-  active: boolean;
-}
-```
-
-Use it:
-
-```typescript
-const customer: Customer = {
-  id: 1,
-  name: 'Siraj',
-  email: 'siraj@example.com',
-  active: true
-};
-```
-
-Interfaces are commonly used in Angular for models and API response structures.
-
-# Optional Properties
-
-Use `?` when a property is optional.
-
-```typescript
-interface Customer {
-  id: number;
-  name: string;
-  email?: string;
-}
-```
-
-# Readonly Properties
-
-`readonly` prevents reassignment after initialization.
-
-```typescript
-interface Customer {
-  readonly id: number;
-  name: string;
-}
-```
-
-# Union Types
-
-A union allows a value to have more than one possible type.
-
-```typescript
-let customerId: number | string;
-
-customerId = 101;
-customerId = 'CUS-101';
-```
-
-# Literal Types
-
-A literal type restricts a value to specific values.
-
-```typescript
-let status: 'active' | 'inactive';
-
-status = 'active';
-```
-
-# Type Aliases
-
-A type alias gives a reusable name to a type.
-
-```typescript
-type CustomerId = number | string;
-```
-
-Use it:
-
-```typescript
-let id: CustomerId = 101;
-let anotherId: CustomerId = 'CUS-101';
-```
-
-# Functions
-
-TypeScript allows types for function parameters and return values.
-
-```typescript
-function getCustomerName(id: number): string {
-  return 'Siraj';
-}
-```
-
-# Optional Parameters
-
-```typescript
-function greet(name: string, title?: string): string {
-  return title ? `${title} ${name}` : name;
-}
-```
-
-# Default Parameters
-
-```typescript
-function greet(name: string, country = 'India'): string {
-  return `${name} from ${country}`;
-}
-```
-
-# Arrow Functions
-
-Angular code frequently uses arrow functions.
-
-```typescript
-const add = (a: number, b: number): number => {
-  return a + b;
-};
-```
-
-Short form:
-
-```typescript
-const add = (a: number, b: number): number => a + b;
-```
-
-# Classes
-
-TypeScript supports classes.
-
-```typescript
-class Customer {
-  name: string;
-  email: string;
-
-  constructor(name: string, email: string) {
-    this.name = name;
-    this.email = email;
-  }
-}
-```
-
-Angular components and services are TypeScript classes.
-
-# Access Modifiers
-
-| Modifier | Accessibility |
+| Tool | Purpose |
 |---|---|
-| `public` | Accessible everywhere |
-| `private` | Accessible only inside the class |
-| `protected` | Accessible inside the class and subclasses |
+| Node.js | JavaScript runtime required by Angular CLI |
+| NPM | Package manager for Angular dependencies |
+| Angular CLI | Create and manage Angular applications |
+| VS Code | Recommended code editor |
+| Angular Language Service | Angular support in VS Code |
+| Git | Source control |
+
+# Node.js
+
+Node.js provides the runtime required to run Angular CLI and other JavaScript-based development tools.
+
+Check the installed version:
+
+```bash
+node --version
+```
 
 Example:
 
-```typescript
-class Customer {
-  public name = 'Siraj';
-  private email = 'siraj@example.com';
-  protected id = 101;
-}
+```text
+v22.x.x
 ```
 
-`public` is the default access modifier.
+# NPM
 
-# readonly
+NPM is installed with Node.js and is used to install Angular packages and other project dependencies.
 
-`readonly` prevents reassignment.
+Check the version:
 
-```typescript
-class Customer {
-  readonly id = 101;
-}
+```bash
+npm --version
 ```
-
-# Constructor Parameter Properties
-
-TypeScript can create and initialize class properties directly from constructor parameters.
-
-```typescript
-class Customer {
-
-  constructor(
-    private name: string,
-    private email: string
-  ) {
-  }
-
-}
-```
-
-This is commonly seen in Angular applications.
-
-# Inheritance
-
-A class can extend another class.
-
-```typescript
-class Person {
-  name = 'Siraj';
-}
-
-class Customer extends Person {
-  customerId = 101;
-}
-```
-
-# Generics
-
-Generics allow reusable code while preserving type safety.
-
-```typescript
-function getValue<T>(value: T): T {
-  return value;
-}
-```
-
-Usage:
-
-```typescript
-const name = getValue<string>('Siraj');
-const id = getValue<number>(101);
-```
-
-Generics are common in Angular and RxJS APIs.
-
-# Enum
-
-Enums define a set of named constants.
-
-```typescript
-enum CustomerStatus {
-  Active,
-  Inactive,
-  Blocked
-}
-```
-
-Usage:
-
-```typescript
-const status = CustomerStatus.Active;
-```
-
-For many modern TypeScript applications, union types are often preferred when a simple set of string values is sufficient.
-
-# any
-
-`any` disables most type checking for a value.
-
-```typescript
-let value: any = 'Siraj';
-
-value = 100;
-value = true;
-```
-
-Avoid `any` unless there is a specific reason to use it.
-
-# unknown
-
-`unknown` is safer than `any` when the type is not known.
-
-```typescript
-let value: unknown = 'Siraj';
-```
-
-Before using it as a specific type, TypeScript requires type checking.
-
-```typescript
-if (typeof value === 'string') {
-  console.log(value.toUpperCase());
-}
-```
-
-# Type Assertion
-
-A type assertion tells TypeScript how you want a value to be treated.
-
-```typescript
-const value: unknown = 'Siraj';
-
-const name = value as string;
-```
-
-Type assertion does not perform runtime conversion.
-
-# Null Safety
-
-With strict TypeScript settings, `null` and `undefined` are treated carefully.
-
-```typescript
-let name: string | null = null;
-
-name = 'Siraj';
-```
-
-# Modules and Imports
-
-TypeScript supports modules using `export` and `import`.
-
-Export:
-
-```typescript
-export interface Customer {
-  id: number;
-  name: string;
-}
-```
-
-Import:
-
-```typescript
-import { Customer } from './customer';
-```
-
-# TypeScript in Angular
-
-Angular uses TypeScript throughout the application.
 
 Example:
 
-```typescript
-import { Component } from '@angular/core';
-
-@Component({
-  selector: 'app-customer',
-  template: `<h2>{{ name }}</h2>`
-})
-export class Customer {
-
-  name: string = 'Siraj';
-
-}
+```text
+10.x.x
 ```
 
-| TypeScript concept | Angular usage |
-|---|---|
-| Class | Component/service |
-| Interface | Model/API response |
-| Type | Application types |
-| Function | Component/service methods |
-| Access modifier | Control property visibility |
-| Generics | Framework and application APIs |
-| Import/export | Organize application code |
-| Decorator | Angular metadata |
+# Angular CLI
 
-# TypeScript Configuration
+Angular CLI is the command-line tool used to create and manage Angular applications.
 
-Angular projects use TypeScript configuration files.
+Check whether Angular CLI is installed:
 
-Common files:
+```bash
+ng version
+```
+
+If Angular CLI is not installed:
+
+```bash
+npm install -g @angular/cli
+```
+
+Verify:
+
+```bash
+ng version
+```
+
+For this course, we use **Angular 21**.
+
+# Verify Angular CLI
+
+Run:
+
+```bash
+ng version
+```
+
+You should see information similar to:
 
 ```text
-tsconfig.json
-tsconfig.app.json
-tsconfig.spec.json
+Angular CLI       : 21.x.x
+Angular           : 21.x.x
+Node.js           : 22.x.x
+Package Manager   : npm
 ```
 
-Important compiler options include:
+The exact patch versions may differ.
 
-```json
-{
-  "compilerOptions": {
-    "strict": true,
-    "target": "ES2022"
-  }
-}
+# VS Code
+
+Visual Studio Code is the recommended editor for this course.
+
+Recommended extensions:
+
+| Extension | Purpose |
+|---|---|
+| Angular Language Service | Angular templates, navigation and diagnostics |
+| ESLint | Code-quality and linting support |
+| Prettier - Code formatter | Consistent code formatting |
+
+# Angular Language Service
+
+Angular Language Service provides Angular-specific editor support.
+
+It helps with:
+
+- Angular template syntax
+- Code completion
+- Template diagnostics
+- Navigation
+- Type information
+
+Install from:
+
+```text
+VS Code → Extensions → Angular Language Service
 ```
 
-`strict: true` enables stronger type checking and is recommended for Angular applications.
+# ESLint
 
-# TypeScript Best Practices for Angular
+ESLint helps identify potential problems and enforce coding rules.
 
-- Prefer explicit types when they improve readability.
-- Use type inference when the type is obvious.
-- Avoid `any`.
-- Prefer `unknown` when a value's type is not known.
-- Use interfaces or type aliases for reusable data structures.
-- Use `readonly` for values that should not be reassigned.
-- Keep classes focused on a clear responsibility.
-- Use access modifiers appropriately.
-- Prefer strict type checking.
-- Use meaningful type and interface names.
-- Keep shared models in an appropriate application folder.
+It can help detect:
+
+- Incorrect code patterns
+- Unused code
+- Potential errors
+- Project-specific rule violations
+
+# Prettier
+
+Prettier is used to automatically format source code.
+
+Benefits:
+
+- Consistent formatting
+- Easier code reviews
+- Consistent coding style
+
+# Git
+
+Git is used for source control.
+
+Check the installed version:
+
+```bash
+git --version
+```
+
+Example:
+
+```text
+git version 2.x.x
+```
+
+# Project Directory
+
+Our Angular course repository and local project directory are:
+
+```text
+angular-in-action
+```
+
+Create and enter the directory:
+
+```bash
+mkdir angular-in-action
+cd angular-in-action
+```
+
+# Verify the Environment
+
+Run:
+
+```bash
+node --version
+npm --version
+ng version
+git --version
+```
+
+Example:
+
+```text
+Node.js       → 22.x.x
+NPM           → 10.x.x
+Angular CLI   → 21.x.x
+Git           → 2.x.x
+```
+
+# Useful Angular CLI Commands
+
+| Command | Purpose |
+|---|---|
+| `ng version` | Display Angular and CLI versions |
+| `ng help` | Display Angular CLI help |
+| `ng new` | Create a new Angular application |
+| `ng generate` | Generate Angular files |
+| `ng serve` | Start development server |
+| `ng build` | Build the application |
+| `ng test` | Run tests |
+
+# Environment Checklist
+
+- [ ] Node.js installed
+- [ ] NPM available
+- [ ] Angular CLI 21 available
+- [ ] Git installed
+- [ ] VS Code installed
+- [ ] Angular Language Service installed
+- [ ] ESLint available when required
+- [ ] Prettier available when required
 
 # Quick Revision
 
-| Concept | Example |
+| Command | Purpose |
 |---|---|
-| Type annotation | `name: string` |
-| Type inference | `name = 'Siraj'` |
-| Array | `string[]` |
-| Interface | `interface Customer {}` |
-| Type alias | `type CustomerId = number` |
-| Union | `number | string` |
-| Optional property | `email?: string` |
-| Readonly | `readonly id` |
-| Function | `(id: number): string` |
-| Class | `class Customer {}` |
-| Private | `private name` |
-| Protected | `protected id` |
-| Generic | `Array<Customer>` |
-| Type assertion | `value as string` |
-| Module | `export` / `import` |
+| `node --version` | Check Node.js |
+| `npm --version` | Check NPM |
+| `ng version` | Check Angular CLI |
+| `git --version` | Check Git |
+| `ng help` | Angular CLI help |
 
 # Key Takeaways
 
-- TypeScript is the primary programming language used by Angular.
-- TypeScript adds static typing to JavaScript.
-- Interfaces and type aliases define reusable data structures.
-- Classes are used extensively for Angular components and services.
-- Generics provide reusable and type-safe code.
-- Union types allow multiple valid types.
-- Access modifiers control class member visibility.
-- `readonly` prevents reassignment.
-- Avoid `any` when possible.
-- Strict type checking improves application reliability.
-- Understanding TypeScript is essential for effective Angular development.
+- Node.js is required for Angular development.
+- NPM manages Angular packages and dependencies.
+- Angular CLI is used to create and manage Angular applications.
+- VS Code provides the development environment.
+- Angular Language Service provides Angular-specific editor support.
+- ESLint helps identify code-quality issues.
+- Prettier provides consistent code formatting.
+- Git manages source code and branches.
