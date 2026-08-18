@@ -1,0 +1,13 @@
+nav {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  
+  nav a {
+    text-decoration: none;
+  }
+  
+  nav a.active {
+    font-weight: bold;
+  }

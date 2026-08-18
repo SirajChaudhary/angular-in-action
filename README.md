@@ -1,366 +1,177 @@
-# Lesson 10 — Pipes
+# Lesson 11 — Routing & Navigation
 
-# What are Pipes
+# What is Angular Routing
 
-Pipes transform data in an Angular template before displaying it.
-
-They are commonly used for:
-
-- Formatting text.
-- Formatting numbers.
-- Formatting currency.
-- Formatting dates.
-- Displaying JSON data.
-- Creating reusable presentation transformations.
-
-Pipes transform the value for display without changing the original component property.
-
-# Pipe Syntax
-
-The basic syntax is:
-
-```html
-{{ value | pipeName }}
-```
-
-Example:
-
-```html
-<p>{{ name | uppercase }}</p>
-```
-
-If:
-
-```typescript
-name = 'Siraj';
-```
-
-the output is:
-
-```text
-SIRAJ
-```
-
-# Pipe with Parameters
-
-A pipe can receive parameters.
-
-Syntax:
-
-```html
-{{ value | pipeName: parameter }}
-```
-
-Example:
-
-```html
-{{ price | currency:'INR' }}
-```
-
-# Built-in Pipes
-
-Angular provides several built-in pipes.
-
-| Pipe | Purpose | Angular Class | Example |
-|---|---|---|---|
-| `uppercase` | Converts text to uppercase | `UpperCasePipe` | `{{ name \| uppercase }}` |
-| `lowercase` | Converts text to lowercase | `LowerCasePipe` | `{{ name \| lowercase }}` |
-| `titlecase` | Converts text to title case | `TitleCasePipe` | `{{ name \| titlecase }}` |
-| `currency` | Formats currency | `CurrencyPipe` | `{{ price \| currency }}` |
-| `number` | Formats numbers | `DecimalPipe` | `{{ price \| number }}` |
-| `percent` | Formats percentages | `PercentPipe` | `{{ percentage \| percent }}` |
-| `date` | Formats dates | `DatePipe` | `{{ today \| date }}` |
-| `json` | Displays an object as JSON | `JsonPipe` | `{{ customer \| json }}` |
-
-# 1. Uppercase Pipe
-
-The `uppercase` pipe converts text to uppercase.
-
-```html
-<p>{{ name | uppercase }}</p>
-```
-
-If:
-
-```typescript
-name = 'Siraj';
-```
-
-Output:
-
-```text
-SIRAJ
-```
-
-# 2. Lowercase Pipe
-
-The `lowercase` pipe converts text to lowercase.
-
-```html
-<p>{{ name | lowercase }}</p>
-```
-
-Output:
-
-```text
-siraj
-```
-
-# 3. Titlecase Pipe
-
-The `titlecase` pipe converts text to title case.
-
-```html
-<p>{{ customerName | titlecase }}</p>
-```
-
-If:
-
-```typescript
-customerName = 'siraj chaudhary';
-```
-
-Output:
-
-```text
-Siraj Chaudhary
-```
-
-# 4. Currency Pipe
-
-The `currency` pipe formats a number as currency.
-
-Example:
-
-```html
-<p>{{ price | currency }}</p>
-```
-
-For Indian Rupees:
-
-```html
-<p>{{ price | currency:'INR' }}</p>
-```
-
-Example:
-
-```typescript
-price = 5000;
-```
-
-The output is formatted as a currency value.
-
-You can also specify the display format:
-
-```html
-<p>{{ price | currency:'INR':'symbol' }}</p>
-```
-
-# 5. Number Pipe
-
-The `number` pipe formats numeric values.
-
-In a standalone component, Angular's `number` pipe is provided by `DecimalPipe`.
-
-```typescript
-import { DecimalPipe } from '@angular/common';
-```
-
-Add it to the component imports:
-
-```typescript
-imports: [DecimalPipe]
-```
-
-Template:
-
-```html
-<p>{{ price | number }}</p>
-```
-
-You can specify minimum and maximum digits:
-
-```html
-<p>{{ price | number:'1.2-2' }}</p>
-```
-
-The format:
-
-```text
-minimumIntegerDigits.minimumFractionDigits-maximumFractionDigits
-```
+Angular Routing allows an application to display different components based on the current URL.
 
 For example:
 
 ```text
-1.2-2
+/customers
+/customers/1
+/about
 ```
 
-means:
+Each URL can be mapped to a different Angular component.
 
-- At least 1 integer digit.
-- At least 2 decimal digits.
-- Maximum 2 decimal digits.
+Routing allows Angular applications to behave like single-page applications while navigating between different views.
 
-# 6. Percent Pipe
+# Why Routing is Used
 
-The `percent` pipe formats a number as a percentage.
+Routing is commonly used to:
 
-```html
-<p>{{ completion | percent }}</p>
-```
+- Navigate between application views.
+- Create URLs for different features.
+- Display different components based on the URL.
+- Pass parameters through URLs.
+- Support browser navigation.
+- Enable programmatic navigation.
 
-If:
-
-```typescript
-completion = 0.75;
-```
-
-Output:
+A typical Angular application can have:
 
 ```text
-75%
+Application
+├── Home
+├── Customers
+├── Customer Details
+└── About
 ```
 
-# 7. Date Pipe
+Each view can have its own route.
 
-The `date` pipe formats a JavaScript `Date`.
+# Routes
+
+A route defines the relationship between a URL path and a component.
 
 Example:
 
 ```typescript
-today = new Date();
+{
+  path: 'customers',
+  component: Customer
+}
 ```
 
-Template:
-
-```html
-<p>{{ today | date }}</p>
-```
-
-You can specify a format:
-
-```html
-<p>{{ today | date:'dd/MM/yyyy' }}</p>
-```
-
-Another example:
-
-```html
-<p>{{ today | date:'medium' }}</p>
-```
-
-# 8. JSON Pipe
-
-The `json` pipe converts an object into a JSON representation.
-
-Example:
-
-```typescript
-customer = {
-  id: 1,
-  name: 'Siraj',
-  email: 'siraj@example.com'
-};
-```
-
-Template:
-
-```html
-<pre>{{ customer | json }}</pre>
-```
-
-This is particularly useful when debugging data in a template.
-
-# 9. Chaining Pipes
-
-Multiple pipes can be applied to the same value.
-
-Example:
-
-```html
-<p>{{ name | lowercase | titlecase }}</p>
-```
-
-Angular evaluates the pipes from left to right.
+This means:
 
 ```text
-name
- ↓
-lowercase
- ↓
-titlecase
- ↓
-display
+/customers
+      ↓
+Customer component
 ```
 
-# How to Implement Pipes in the Current Application
+# RouterOutlet
 
-Create/use **initial Angular project skeleton** and create the `customer` component.
+`RouterOutlet` is the location where Angular renders the component associated with the current route.
+
+Example:
+
+```html
+<router-outlet></router-outlet>
+```
+
+If the current URL is:
+
+```text
+/customers
+```
+
+Angular renders the component configured for the `customers` route inside the `router-outlet`.
+
+# RouterLink
+
+`RouterLink` is used to navigate between routes from an Angular template.
+
+Example:
+
+```html
+<a routerLink="/customers">Customers</a>
+```
+
+Clicking the link navigates to:
+
+```text
+/customers
+```
+
+Angular performs the navigation without requiring a full browser page reload.
+
+# RouterLinkActive
+
+`RouterLinkActive` can be used to apply a CSS class to the active navigation link.
+
+Example:
+
+```html
+<a
+  routerLink="/customers"
+  routerLinkActive="active">
+  Customers
+</a>
+```
+
+When `/customers` is the active route, Angular applies:
+
+```text
+active
+```
+
+to the link.
+
+# How to Implement Routing in the Current Application
+
+Create/use **initial Angular project skeleton** and create the `home`, `customer`, and `about` components.
 
 ```bash
 ng new my-angular-application
+ng g c home
 ng g c customer
+ng g c about
 ```
 
-Then implement the pipe examples step by step.
+Then implement routing step by step.
 
-### Step 1: Open the Customer Component
+### Step 1: Open the Application Routes
 
 Open:
 
 ```text
-src/app/customer/customer.ts
+src/app/app.routes.ts
 ```
 
 Update it:
 
 ```typescript
-import { Component } from '@angular/core';
-import {
-  CurrencyPipe,
-  DatePipe,
-  DecimalPipe,
-  JsonPipe,
-  LowerCasePipe,
-  PercentPipe,
-  TitleCasePipe,
-  UpperCasePipe
-} from '@angular/common';
+import { Routes } from '@angular/router';
+import { Home } from './home/home';
+import { Customer } from './customer/customer';
+import { About } from './about/about';
 
-@Component({
-  selector: 'app-customer',
-  imports: [
-    CurrencyPipe,
-    DatePipe,
-    DecimalPipe,
-    JsonPipe,
-    LowerCasePipe,
-    PercentPipe,
-    TitleCasePipe,
-    UpperCasePipe
-  ],
-  templateUrl: './customer.html',
-  styleUrl: './customer.css'
-})
-export class Customer {
-  name = 'siraj chaudhary';
-  email = 'siraj@example.com';
-
-  price = 5000;
-  completion = 0.75;
-
-  today = new Date();
-
-  customer = {
-    id: 1,
-    name: 'Siraj',
-    email: 'siraj@example.com'
-  };
-}
+export const routes: Routes = [
+  {
+    path: '',
+    component: Home
+  },
+  {
+    path: 'customers',
+    component: Customer
+  },
+  {
+    path: 'about',
+    component: About
+  }
+];
 ```
 
-### Step 2: Add the Customer Component to the Root Component
+The routes now define:
+
+```text
+/            → Home
+/customers   → Customer
+/about       → About
+```
+
+### Step 2: Configure the Root Component
 
 Open:
 
@@ -372,11 +183,15 @@ Update it:
 
 ```typescript
 import { Component, signal } from '@angular/core';
-import { Customer } from './customer/customer';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [Customer],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive
+  ],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -385,7 +200,9 @@ export class App {
 }
 ```
 
-### Step 3: Render the Customer Component
+The standalone root component imports the routing features it uses.
+
+### Step 3: Add RouterOutlet and Navigation Links
 
 Open:
 
@@ -393,13 +210,56 @@ Open:
 src/app/app.html
 ```
 
+Update it:
+
+```html
+<h1>My Angular Application</h1>
+
+<nav>
+  <a
+    routerLink="/"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }">
+    Home
+  </a>
+
+  <a
+    routerLink="/customers"
+    routerLinkActive="active">
+    Customers
+  </a>
+
+  <a
+    routerLink="/about"
+    routerLinkActive="active">
+    About
+  </a>
+</nav>
+
+<router-outlet></router-outlet>
+```
+
+The navigation links change the URL.
+
+The `router-outlet` displays the component associated with the current route.
+
+### Step 4: Add Home Content
+
+Open:
+
+```text
+src/app/home/home.html
+```
+
 Add:
 
 ```html
-<app-customer></app-customer>
+<h2>Home</h2>
+
+<p>Welcome to My Angular Application.</p>
 ```
 
-### Step 4: Add Text Pipes
+### Step 5: Add Customer Content
 
 Open:
 
@@ -410,110 +270,54 @@ src/app/customer/customer.html
 Add:
 
 ```html
-<h2>Pipes</h2>
+<h2>Customers</h2>
 
-<h3>Text Pipes</h3>
-
-<p>Original: {{ name }}</p>
-<p>Uppercase: {{ name | uppercase }}</p>
-<p>Lowercase: {{ name | lowercase }}</p>
-<p>Titlecase: {{ name | titlecase }}</p>
+<p>Customer list goes here.</p>
 ```
 
-### Step 5: Add Currency and Number Pipes
+### Step 6: Add About Content
 
-Add:
-
-```html
-<h3>Number Pipes</h3>
-
-<p>Price: {{ price | currency:'INR' }}</p>
-
-<p>Formatted Price: {{ price | number:'1.2-2' }}</p>
-
-<p>Completion: {{ completion | percent }}</p>
-```
-
-### Step 6: Add Date Pipe
-
-Add:
-
-```html
-<h3>Date Pipe</h3>
-
-<p>Default Date: {{ today | date }}</p>
-
-<p>Formatted Date: {{ today | date:'dd/MM/yyyy' }}</p>
-
-<p>Medium Date: {{ today | date:'medium' }}</p>
-```
-
-### Step 7: Add JSON Pipe
-
-Add:
-
-```html
-<h3>JSON Pipe</h3>
-
-<pre>{{ customer | json }}</pre>
-```
-
-### Step 8: Add Chained Pipes
-
-Add:
-
-```html
-<h3>Chained Pipes</h3>
-
-<p>{{ name | lowercase | titlecase }}</p>
-```
-
-### Step 9: Complete Customer Template
-
-The complete:
+Open:
 
 ```text
-src/app/customer/customer.html
+src/app/about/about.html
 ```
 
-can now be:
+Add:
 
 ```html
-<h2>Pipes</h2>
+<h2>About</h2>
 
-<h3>Text Pipes</h3>
-
-<p>Original: {{ name }}</p>
-<p>Uppercase: {{ name | uppercase }}</p>
-<p>Lowercase: {{ name | lowercase }}</p>
-<p>Titlecase: {{ name | titlecase }}</p>
-
-<h3>Number Pipes</h3>
-
-<p>Price: {{ price | currency:'INR' }}</p>
-
-<p>Formatted Price: {{ price | number:'1.2-2' }}</p>
-
-<p>Completion: {{ completion | percent }}</p>
-
-<h3>Date Pipe</h3>
-
-<p>Default Date: {{ today | date }}</p>
-
-<p>Formatted Date: {{ today | date:'dd/MM/yyyy' }}</p>
-
-<p>Medium Date: {{ today | date:'medium' }}</p>
-
-<h3>JSON Pipe</h3>
-
-<pre>{{ customer | json }}</pre>
-
-<h3>Chained Pipes</h3>
-
-<p>{{ name | lowercase | titlecase }}</p>
+<p>This application demonstrates Angular routing.</p>
 ```
 
-### Step 10: Run the Application
+### Step 7: Add Active Link Styling
+
+Open:
+
+```text
+src/app/app.css
+```
+
+Add:
+
+```css
+nav {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+nav a {
+  text-decoration: none;
+}
+
+nav a.active {
+  font-weight: bold;
+}
+```
+
+### Step 8: Run the Application
 
 From the project root:
 
@@ -527,169 +331,214 @@ Open:
 http://localhost:4200
 ```
 
-You should see the original values transformed by the different pipes.
+Click:
+
+```text
+Home
+Customers
+About
+```
+
+The URL and displayed component should change without a full page reload.
 <br /><br />
-<img width="3840" height="1664" alt="image" src="https://github.com/user-attachments/assets/97e69b68-dd19-4357-8451-bb0cfca525e3" />
+<img width="3840" height="686" alt="image" src="https://github.com/user-attachments/assets/408bb18b-03be-4094-965d-7ea87e8d254a" />
 
-# How Pipes Work
+# Route Parameters
 
-Consider:
-
-```html
-{{ name | uppercase }}
-```
-
-The value:
-
-```text
-siraj chaudhary
-```
-
-is passed to the `uppercase` pipe:
-
-```text
-siraj chaudhary
-        ↓
-    uppercase
-        ↓
-SIRAJ CHAUDHARY
-```
-
-The pipe transforms the value for display.
-
-The original component property remains unchanged:
-
-```typescript
-name = 'siraj chaudhary';
-```
-
-# Pipe Parameters
-
-Some pipes accept parameters.
+Routes can contain parameters.
 
 For example:
 
-```html
-{{ price | currency:'INR' }}
+```typescript
+{
+  path: 'customers/:id',
+  component: Customer
+}
 ```
 
-Here:
-
-```text
-price
-  ↓
-currency pipe
-  ↓
-INR parameter
-  ↓
-formatted currency
-```
-
-Another example:
-
-```html
-{{ today | date:'dd/MM/yyyy' }}
-```
-
-The date format is passed as a parameter to the pipe.
-
-# Pipe vs Component vs Service
-
-| Component | Service | Pipe |
-|---|---|---|
-| Handles UI | Handles reusable logic | Transforms display values |
-| Has a template | Normally no template | Used in templates |
-| Uses `@Component` | Uses `@Injectable` | Uses `@Pipe` |
-| Handles user interaction | Handles business/application logic | Handles presentation transformation |
-| Example: `Customer` | Example: `CustomerService` | Example: `uppercase` |
-
-# Built-in Pipes vs Custom Pipes
-
-Angular provides many built-in pipes.
+The `:id` represents a route parameter.
 
 Examples:
 
 ```text
-uppercase
-lowercase
-titlecase
-currency
-number
-percent
-date
-json
+/customers/1
+/customers/2
+/customers/10
 ```
 
-You can also create your own custom pipe when the required transformation is not provided by Angular.
+All of these URLs match the same route.
 
-# Custom Pipes
+The value of `id` changes.
 
-A custom pipe can encapsulate a reusable presentation transformation.
-
-For example, we could create a pipe that converts a customer name into a custom display format.
-
-Create a pipe:
-
-```bash
-ng g pipe pipes/customer-name
-```
-
-The CLI creates:
-
-```text
-src/app/pipes/
-├── customer-name.ts
-└── customer-name.spec.ts
-```
+# How to Add a Route Parameter
 
 Open:
 
 ```text
-src/app/pipes/customer-name.ts
+src/app/app.routes.ts
+```
+
+Update the customer route:
+
+```typescript
+{
+  path: 'customers/:id',
+  component: Customer
+}
+```
+
+The route now expects a customer ID.
+
+For example:
+
+```text
+/customers/101
+```
+
+matches:
+
+```text
+customers/:id
+```
+
+with:
+
+```text
+id = 101
+```
+
+# Reading Route Parameters
+
+Angular provides `ActivatedRoute` for accessing route information.
+
+Open:
+
+```text
+src/app/customer/customer.ts
 ```
 
 Example:
 
 ```typescript
-import { Pipe, PipeTransform } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
-@Pipe({
-  name: 'customerName'
+@Component({
+  selector: 'app-customer',
+  imports: [],
+  templateUrl: './customer.html',
+  styleUrl: './customer.css'
 })
-export class CustomerNamePipe implements PipeTransform {
-  transform(value: string): string {
-    return value.toUpperCase();
+export class Customer implements OnInit {
+
+  customerId = '';
+
+  constructor(private route: ActivatedRoute) {
+  }
+
+  ngOnInit(): void {
+    this.customerId = this.route.snapshot.paramMap.get('id') ?? '';
   }
 }
 ```
 
-Import the pipe into the standalone component:
+The parameter can then be displayed in the template:
+
+```html
+<h2>Customer Details</h2>
+
+<p>Customer ID: {{ customerId }}</p>
+```
+
+For:
+
+```text
+/customers/101
+```
+
+the output is:
+
+```text
+Customer ID: 101
+```
+
+# Programmatic Navigation
+
+Angular also allows navigation from TypeScript code.
+
+Use the `Router` service.
+
+Example:
 
 ```typescript
-import { CustomerNamePipe } from '../pipes/customer-name';
+import { Router } from '@angular/router';
+```
 
-@Component({
-  selector: 'app-customer',
-  imports: [CustomerNamePipe],
-  templateUrl: './customer.html',
-  styleUrl: './customer.css'
-})
-export class Customer {
-  name = 'siraj chaudhary';
+Inject it:
+
+```typescript
+constructor(private router: Router) {
 }
 ```
 
-Use the custom pipe:
+Navigate programmatically:
 
-```html
-<p>{{ name | customerName }}</p>
+```typescript
+this.router.navigate(['/customers']);
 ```
 
-Output:
+For a customer ID:
+
+```typescript
+this.router.navigate(['/customers', 101]);
+```
+
+This navigates to:
 
 ```text
-SIRAJ CHAUDHARY
+/customers/101
 ```
+
+# Navigation Flow
+
+Angular routing works conceptually like this:
+
+```text
+User clicks link
+       ↓
+RouterLink
+       ↓
+Angular Router
+       ↓
+Route matching
+       ↓
+Component
+       ↓
+RouterOutlet
+```
+
+For programmatic navigation:
+
+```text
+Component
+    ↓
+Router
+    ↓
+Route matching
+    ↓
+RouterOutlet
+```
+
+# Route vs RouterLink vs RouterOutlet
+
+| Feature | Purpose | Example |
+|---|---|---|
+| Route | Maps URL to component | `path: 'customers'` |
+| RouterLink | Navigates from template | `routerLink="/customers"` |
+| RouterOutlet | Displays routed component | `<router-outlet>` |
+| RouterLinkActive | Styles active route | `routerLinkActive="active"` |
+| Router | Navigates from TypeScript | `router.navigate()` |
+| ActivatedRoute | Reads route information | `route.snapshot.paramMap` |
 
 # Practical Project Structure
 
@@ -701,15 +550,23 @@ my-angular-application/
 │
 ├── src/
 │   ├── app/
-│   │   ├── pipes/
-│   │   │   ├── customer-name.ts
-│   │   │   └── customer-name.spec.ts
+│   │   ├── home/
+│   │   │   ├── home.ts
+│   │   │   ├── home.html
+│   │   │   ├── home.css
+│   │   │   └── home.spec.ts
 │   │   │
 │   │   ├── customer/
 │   │   │   ├── customer.ts
 │   │   │   ├── customer.html
 │   │   │   ├── customer.css
 │   │   │   └── customer.spec.ts
+│   │   │
+│   │   ├── about/
+│   │   │   ├── about.ts
+│   │   │   ├── about.html
+│   │   │   ├── about.css
+│   │   │   └── about.spec.ts
 │   │   │
 │   │   ├── app.ts
 │   │   ├── app.html
@@ -734,26 +591,24 @@ my-angular-application/
 
 # Quick Revision
 
-| Pipe | Purpose | Angular Class | Example |
-|---|---|---|---|
-| `uppercase` | Uppercase text | `UpperCasePipe` | `{{ name \| uppercase }}` |
-| `lowercase` | Lowercase text | `LowerCasePipe` | `{{ name \| lowercase }}` |
-| `titlecase` | Title case text | `TitleCasePipe` | `{{ name \| titlecase }}` |
-| `currency` | Format currency | `CurrencyPipe` | `{{ price \| currency:'INR' }}` |
-| `number` | Format numbers | `DecimalPipe` | `{{ price \| number:'1.2-2' }}` |
-| `percent` | Format percentages | `PercentPipe` | `{{ completion \| percent }}` |
-| `date` | Format dates | `DatePipe` | `{{ today \| date:'dd/MM/yyyy' }}` |
-| `json` | Display object as JSON | `JsonPipe` | `{{ customer \| json }}` |
-| Custom pipe | Custom transformation | Custom pipe class | `{{ name \| customerName }}` |
+| Concept | Purpose | Example |
+|---|---|---|
+| Route | Maps URL to component | `path: 'customers'` |
+| RouterOutlet | Displays routed component | `<router-outlet>` |
+| RouterLink | Template navigation | `routerLink="/customers"` |
+| RouterLinkActive | Active link styling | `routerLinkActive="active"` |
+| Route parameter | Passes values through URL | `customers/:id` |
+| ActivatedRoute | Reads route information | `paramMap.get('id')` |
+| Router | Programmatic navigation | `router.navigate()` |
 
 # Key Takeaways
 
-- Pipes transform values for display in Angular templates.
-- Pipes do not normally change the original component property.
-- Angular provides many built-in pipes.
-- Pipes can accept parameters.
-- Multiple pipes can be chained together.
-- Custom pipes can be created for reusable presentation transformations.
-- Standalone components import the pipes they use directly.
-- The `number` pipe is provided by Angular's `DecimalPipe`.
-- Pipes should generally focus on presentation transformation rather than business logic.
+- Angular Router maps URLs to components.
+- `Routes` defines the application's routes.
+- `RouterOutlet` displays the active routed component.
+- `RouterLink` provides navigation from templates.
+- `RouterLinkActive` identifies the active navigation link.
+- Route parameters allow values to be passed through URLs.
+- `ActivatedRoute` can be used to read route parameters.
+- `Router` can be used for programmatic navigation.
+- Angular routing allows navigation between views without a full page reload.
