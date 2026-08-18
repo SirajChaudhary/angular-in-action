@@ -1,47 +1,9 @@
-<h2>Customer Details</h2>
+<h2>Directives</h2>
 
-<h2>Interpolation</h2>
+<p appHighlight>
+  Move the mouse over this text.
+</p>
 
-<p>Name: {{ name }}</p>
-<p>Email: {{ email }}</p>
-<p>Uppercase: {{ name.toUpperCase() }}</p>
-
-<h2>Property Binding</h2>
-
-<button [disabled]="isDisabled">
-  Disabled Button
+<button appHighlight>
+  Move the mouse over this button.
 </button>
-
-<img
-  [src]="imageUrl"
-  [alt]="name">
-
-<h2>Attribute Binding</h2>
-
-<button [attr.aria-label]="'Select ' + name">
-  Select Customer
-</button>
-
-<table border="1">
-  <tr>
-    <td [attr.colspan]="columnSpan">
-      Customer Details
-    </td>
-  </tr>
-</table>
-
-<h2>Event Binding</h2>
-
-<button (click)="selectCustomer()">
-  Select Customer
-</button>
-
-<input
-  [value]="name"
-  (input)="onInput($event)">
-
-<h2>Two-Way Binding</h2>
-
-<input [(ngModel)]="name">
-
-<p>Current Name: {{ name }}</p>

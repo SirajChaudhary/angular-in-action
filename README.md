@@ -1,310 +1,197 @@
-# Lesson 7 — Data Binding
+# Lesson 8 — Directives
 
-# What is Data Binding
+# What are Directives
 
-Data binding connects the component class with its HTML template.
+Directives are classes that add behavior to elements or components.
 
-It allows Angular to:
+Angular directives can be used to:
 
-- Display component data in the UI.
-- Set HTML element properties.
-- Listen for user events.
-- Synchronize data between the component and the UI.
+- Change the appearance of an element.
+- Add behavior to an element.
+- Manipulate element properties.
+- Respond to user interactions.
+- Reuse UI behavior across multiple elements.
 
-# Data Binding Types
+# Types of Directives
 
-1. Interpolation
-2. Property binding
-3. Attribute binding
-4. Event binding
-5. Two-way binding
+1. Attribute directives
+2. Structural directives
+3. Component directives
 
-| Binding | Direction | Syntax | Purpose |
-|---|---|---|---|
-| Interpolation | Component → Template | `{{ value }}` | Display data |
-| Property binding | Component → Template | `[property]="value"` | Set DOM/component properties |
-| Attribute binding | Component → Template | `[attr.name]="value"` | Set HTML attributes |
-| Event binding | Template → Component | `(event)="method()"` | Respond to events |
-| Two-way binding | Component ↔ Template | `[(ngModel)]="value"` | Synchronize data |
+| Type | Purpose | Example |
+|---|---|---|
+| Attribute directive | Change appearance or behavior | `ngClass`, `ngStyle` |
+| Structural directive | Add/remove/repeat template content | `*ngIf`, `*ngFor` |
+| Component | Directive with its own template | `@Component` |
 
-# 1. Interpolation
-
-Interpolation displays component data inside the template.
-
-Syntax:
-
-```html
-{{ expression }}
-```
-
-Example:
-
-```typescript
-export class Customer {
-  name = 'Siraj';
-}
-```
-
-Template:
-
-```html
-<p>Name: {{ name }}</p>
-```
-
-Output:
+Angular 21 also provides the modern built-in control-flow syntax such as:
 
 ```text
-Name: Siraj
+@if
+@for
+@switch
 ```
 
-## Interpolation with Expressions
+These are the modern replacement for many common structural-directive use cases.
 
-Interpolation can also evaluate expressions.
+# 1. Attribute Directives
+
+Attribute directives change the behavior or appearance of an existing element.
+
+Examples include:
 
 ```html
-<p>{{ name.toUpperCase() }}</p>
+<div [ngClass]="..."></div>
 ```
 
-You can also use simple calculations:
+and:
 
 ```html
-<p>Total: {{ price * quantity }}</p>
+<div [ngStyle]="..."></div>
 ```
 
-Example:
+An attribute directive does not normally create its own template.
 
-```typescript
-price = 500;
-quantity = 2;
-```
+It operates on an existing element.
 
-Output:
+# 2. Structural Directives
 
-```text
-Total: 1000
-```
+Structural directives change the structure of the DOM by adding or removing elements.
 
-# 2. Property Binding
-
-Property binding sets a DOM property using component data.
-
-Syntax:
+Traditional Angular examples include:
 
 ```html
-[property]="expression"
+<div *ngIf="isActive">
+  Active Customer
+</div>
 ```
 
-Example:
-
-```typescript
-isDisabled = true;
-```
-
-Template:
+and:
 
 ```html
-<button [disabled]="isDisabled">
-  Select Customer
-</button>
+<div *ngFor="let customer of customers">
+  {{ customer.name }}
+</div>
 ```
 
-When `isDisabled` is `true`, the button is disabled.
-
-When it becomes `false`, the button becomes enabled.
-
-# Property Binding vs Interpolation
-
-Both can sometimes produce similar visible results, but they are not the same.
-
-### Interpolation
+However, modern Angular applications use the built-in control-flow syntax:
 
 ```html
-<img src="{{ imageUrl }}">
-```
-
-### Property Binding
-
-```html
-<img [src]="imageUrl">
-```
-
-Property binding directly binds to the DOM property.
-
-For DOM properties, prefer property binding when you are explicitly binding a property.
-
-# Common Property Bindings
-
-| Property | Example |
-|---|---|
-| `disabled` | `[disabled]="isDisabled"` |
-| `value` | `[value]="name"` |
-| `src` | `[src]="imageUrl"` |
-| `checked` | `[checked]="isSelected"` |
-| `hidden` | `[hidden]="isHidden"` |
-| `className` | `[className]="customerClass"` |
-
-# 3. Attribute Binding
-
-Attribute binding is used when you need to bind an HTML attribute.
-
-Syntax:
-
-```html
-[attr.attribute]="expression"
-```
-
-Example:
-
-```html
-<td [attr.colspan]="columnSpan">
-  Customer Details
-</td>
-```
-
-Component:
-
-```typescript
-columnSpan = 2;
-```
-
-The resulting HTML attribute is:
-
-```html
-<td colspan="2">
-```
-
-# Property vs Attribute Binding
-
-| Property Binding | Attribute Binding |
-|---|---|
-| `[disabled]` | `[attr.aria-label]` |
-| Works with DOM properties | Works with HTML attributes |
-| `[value]` | `[attr.colspan]` |
-| `[checked]` | `[attr.data-id]` |
-
-# 4. Event Binding
-
-Event binding allows the template to respond to events and call component methods.
-
-Syntax:
-
-```html
-(event)="method()"
-```
-
-Example:
-
-```html
-<button (click)="selectCustomer()">
-  Select Customer
-</button>
-```
-
-Component:
-
-```typescript
-selectCustomer(): void {
-  console.log('Customer selected');
+@if (isActive) {
+  <div>Active Customer</div>
 }
 ```
 
-# Event Object
-
-Angular can provide the browser event object.
+and:
 
 ```html
-<input (input)="onInput($event)">
-```
-
-Component:
-
-```typescript
-onInput(event: Event): void {
-  const input = event.target as HTMLInputElement;
-
-  console.log(input.value);
+@for (customer of customers; track customer.id) {
+  <div>{{ customer.name }}</div>
 }
 ```
 
-# Common Events
+For new Angular 21 applications, prefer the modern control-flow syntax.
 
-| Event | Example |
-|---|---|
-| `click` | `(click)="save()"` |
-| `input` | `(input)="onInput($event)"` |
-| `change` | `(change)="onChange($event)"` |
-| `keyup` | `(keyup)="onKeyUp($event)"` |
-| `keydown` | `(keydown)="onKeyDown($event)"` |
-| `mouseover` | `(mouseover)="onMouseOver()"` |
-| `mouseleave` | `(mouseleave)="onMouseLeave()"` |
+# 3. Component Directives
 
-# 5. Two-Way Binding
+A component is a specialized type of directive that has its own template.
 
-Two-way binding synchronizes data between the component and the template.
-
-Syntax:
-
-```html
-[(ngModel)]="property"
-```
-
-It combines property binding and event binding.
-
-# Using ngModel
-
-Angular's `ngModel` directive is provided by `FormsModule`.
-
-Import it into a standalone component:
+Example:
 
 ```typescript
-import { FormsModule } from '@angular/forms';
-
 @Component({
   selector: 'app-customer',
-  imports: [FormsModule],
   templateUrl: './customer.html'
 })
 export class Customer {
-  name = 'Siraj';
 }
 ```
 
-Template:
+A component represents a reusable UI feature, while an attribute directive enhances an existing element or component.
 
-```html
-<input [(ngModel)]="name">
+# How to Implement a Custom Directive in the Current Application
 
-<p>Name: {{ name }}</p>
-```
-
-# Two-Way Binding Concept
-
-This:
-
-```html
-<input [(ngModel)]="name">
-```
-
-can be understood conceptually as:
-
-```html
-<input
-  [ngModel]="name"
-  (ngModelChange)="name = $event">
-```
-
-# How to Implement Data Binding in the Current Application
-
-Create/use **initial Angular project skeleton** and create the `customer` component.
+Create/use **initial Angular project skeleton** and create the `highlight` directive.
 
 ```bash
 ng new my-angular-application
+ng g directive directives/highlight
+```
+
+The CLI creates:
+
+```text
+src/app/directives/
+├── highlight.ts
+└── highlight.spec.ts
+```
+
+Then implement the directive step by step.
+
+### Step 1: Open the Highlight Directive
+
+Open:
+
+```text
+src/app/directives/highlight.ts
+```
+
+Update it:
+
+```typescript
+import { Directive, ElementRef, HostListener } from '@angular/core';
+
+@Directive({
+  selector: '[appHighlight]'
+})
+export class Highlight {
+  constructor(private elementRef: ElementRef) {}
+
+  @HostListener('mouseenter')
+  onMouseEnter(): void {
+    this.elementRef.nativeElement.style.backgroundColor = 'yellow';
+  }
+
+  @HostListener('mouseleave')
+  onMouseLeave(): void {
+    this.elementRef.nativeElement.style.backgroundColor = '';
+  }
+}
+```
+
+The selector:
+
+```typescript
+selector: '[appHighlight]'
+```
+
+means the directive can be used as an HTML attribute:
+
+```html
+<p appHighlight>
+  Customer
+</p>
+```
+
+### Step 2: Create the Customer Component
+
+Create the component:
+
+```bash
 ng g c customer
 ```
 
-Then implement the data-binding concepts step by step.
+Angular creates:
 
-### Step 1: Open the Customer Component
+```text
+src/app/customer/
+├── customer.ts
+├── customer.html
+├── customer.css
+└── customer.spec.ts
+```
+
+### Step 3: Import the Directive
 
 Open:
 
@@ -316,38 +203,57 @@ Update it:
 
 ```typescript
 import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Highlight } from '../directives/highlight';
 
 @Component({
   selector: 'app-customer',
-  imports: [FormsModule],
+  imports: [Highlight],
   templateUrl: './customer.html',
   styleUrl: './customer.css'
 })
 export class Customer {
-  name = 'Siraj';
-  email = 'siraj@example.com';
-
-  isActive = true;
-  isDisabled = true;
-
-  imageUrl = 'http://www.sirajchaudhary.com/assets/img/sirajchaudhary.jpg';
-
-  columnSpan = 2;
-
-  selectCustomer(): void {
-    console.log('Customer selected:', this.name);
-  }
-
-  onInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-
-    console.log('Input value:', input.value);
-  }
 }
 ```
 
-### Step 2: Add the Customer Component to the Root Component
+Because this is a standalone component, the directive is imported directly into the component.
+
+### Step 4: Use the Directive
+
+Open:
+
+```text
+src/app/customer/customer.html
+```
+
+Add:
+
+```html
+<h2>Directives</h2>
+
+<p appHighlight>
+  Move the mouse over this text.
+</p>
+
+<button appHighlight>
+  Move the mouse over this button.
+</button>
+```
+
+The same directive can now be reused on different elements.
+
+### Step 5: Update app.html
+
+Open:
+
+```text
+src/app/app.html
+```
+
+Add:
+
+```html
+<app-customer></app-customer>
+```
 
 Open:
 
@@ -355,7 +261,7 @@ Open:
 src/app/app.ts
 ```
 
-Import the `Customer` component:
+Import `Customer` and include it in the component imports:
 
 ```typescript
 import { Component, signal } from '@angular/core';
@@ -372,171 +278,7 @@ export class App {
 }
 ```
 
-### Step 3: Render the Customer Component
-
-Open:
-
-```text
-src/app/app.html
-```
-
-Add:
-
-```html
-<h1>My Angular Application</h1>
-
-<app-customer></app-customer>
-```
-
-### Step 4: Add Interpolation
-
-Open:
-
-```text
-src/app/customer/customer.html
-```
-
-Add:
-
-```html
-<h2>Interpolation</h2>
-
-<p>Name: {{ name }}</p>
-<p>Email: {{ email }}</p>
-<p>Uppercase: {{ name.toUpperCase() }}</p>
-```
-
-### Step 5: Add Property Binding
-
-Add:
-
-```html
-<h2>Property Binding</h2>
-
-<button [disabled]="isDisabled">
-  Disabled Button
-</button>
-
-<img
-  [src]="imageUrl"
-  [alt]="name">
-```
-
-### Step 6: Add Attribute Binding
-
-Add:
-
-```html
-<h2>Attribute Binding</h2>
-
-<button [attr.aria-label]="'Select ' + name">
-  Select Customer
-</button>
-
-<table border="1">
-  <tr>
-    <td [attr.colspan]="columnSpan">
-      Customer Details
-    </td>
-  </tr>
-</table>
-```
-
-### Step 7: Add Event Binding
-
-Add:
-
-```html
-<h2>Event Binding</h2>
-
-<button (click)="selectCustomer()">
-  Select Customer
-</button>
-```
-
-### Step 8: Add Event Object
-
-Add:
-
-```html
-<input
-  [value]="name"
-  (input)="onInput($event)">
-```
-
-### Step 9: Add Two-Way Binding
-
-Add:
-
-```html
-<h2>Two-Way Binding</h2>
-
-<input [(ngModel)]="name">
-
-<p>Current Name: {{ name }}</p>
-```
-
-### Step 10: Complete Customer Template
-
-The complete:
-
-```text
-src/app/customer/customer.html
-```
-
-can now be:
-
-```html
-<h2>Customer Details</h2>
-
-<h2>Interpolation</h2>
-
-<p>Name: {{ name }}</p>
-<p>Email: {{ email }}</p>
-<p>Uppercase: {{ name.toUpperCase() }}</p>
-
-<h2>Property Binding</h2>
-
-<button [disabled]="isDisabled">
-  Disabled Button
-</button>
-
-<img
-  [src]="imageUrl"
-  [alt]="name">
-
-<h2>Attribute Binding</h2>
-
-<button [attr.aria-label]="'Select ' + name">
-  Select Customer
-</button>
-
-<table border="1">
-  <tr>
-    <td [attr.colspan]="columnSpan">
-      Customer Details
-    </td>
-  </tr>
-</table>
-
-<h2>Event Binding</h2>
-
-<button (click)="selectCustomer()">
-  Select Customer
-</button>
-
-<input
-  [value]="name"
-  (input)="onInput($event)">
-
-<h2>Two-Way Binding</h2>
-
-<input [(ngModel)]="name">
-
-<p>Current Name: {{ name }}</p>
-```
-
-# Run the Application
+### Step 6: Run the Application
 
 From the project root:
 
@@ -550,108 +292,218 @@ Open:
 http://localhost:4200
 ```
 
-<img width="3840" height="2076" alt="image" src="https://github.com/user-attachments/assets/e717952c-6282-4805-9acd-15ddf5a141da" />
+Move the mouse over:
 
-# Test Each Binding
+```text
+Move the mouse over this text.
+```
 
-| Example | Test |
+The background should change to yellow.
+
+Move the mouse away and the background should return to normal.
+
+<img width="3840" height="498" alt="Directive highlight example" src="https://github.com/user-attachments/assets/166ea015-a546-45ed-842e-a910786d1896" />
+
+# How the Custom Directive Works
+
+The directive:
+
+```typescript
+@Directive({
+  selector: '[appHighlight]'
+})
+```
+
+defines the directive.
+
+The selector:
+
+```text
+[appHighlight]
+```
+
+matches elements containing the `appHighlight` attribute.
+
+For example:
+
+```html
+<p appHighlight>
+```
+
+Angular attaches the directive to that `<p>` element.
+
+# HostListener
+
+The directive uses:
+
+```typescript
+@HostListener('mouseenter')
+```
+
+to listen for the host element's `mouseenter` event.
+
+When the event occurs:
+
+```typescript
+onMouseEnter(): void {
+  this.elementRef.nativeElement.style.backgroundColor = 'yellow';
+}
+```
+
+When the mouse leaves:
+
+```typescript
+@HostListener('mouseleave')
+```
+
+Angular calls:
+
+```typescript
+onMouseLeave(): void {
+  this.elementRef.nativeElement.style.backgroundColor = '';
+}
+```
+
+# ElementRef
+
+`ElementRef` provides access to the DOM element associated with the directive.
+
+Example:
+
+```typescript
+constructor(private elementRef: ElementRef) {}
+```
+
+The host element can then be accessed through:
+
+```typescript
+this.elementRef.nativeElement
+```
+
+For example:
+
+```typescript
+this.elementRef.nativeElement.style.backgroundColor = 'yellow';
+```
+
+For simple DOM behavior this demonstrates the concept clearly, although Angular's template bindings and renderer-based approaches are generally preferable to direct DOM manipulation when practical.
+
+# Directive vs Component
+
+| Component | Directive |
 |---|---|
-| Interpolation | Observe the displayed values |
-| Property binding | Change `isDisabled` |
-| Attribute binding | Inspect the HTML |
-| Event binding | Click the button |
-| Input event | Type into the first input |
-| Two-way binding | Change the name |
-| Image binding | Observe the image |
+| Has its own template | Does not require its own template |
+| Defines a UI component | Adds behavior or appearance |
+| Uses `@Component` | Uses `@Directive` |
+| Usually represents a UI feature | Usually enhances an existing element |
+| Example: `Customer` | Example: `Highlight` |
 
-# Observe Two-Way Binding
+A component is technically a specialized type of directive that has a template.
 
-Initially:
+# Directive Selector
 
-```text
-name = "Siraj"
+Our directive uses:
+
+```typescript
+selector: '[appHighlight]'
 ```
 
-The UI shows:
+Therefore:
 
-```text
-Current Name: Siraj
+```html
+<p appHighlight>
 ```
 
-Change the input to:
+works.
 
-```text
-Ahmed
+The square brackets in the selector indicate that Angular is matching an attribute.
+
+A directive can also use other selector forms, but attribute selectors are commonly used for custom behavior directives.
+
+# Reusing a Directive
+
+One of the main benefits of a directive is reuse.
+
+The same directive can be applied to multiple elements:
+
+```html
+<p appHighlight>
+  Customer Name
+</p>
+
+<p appHighlight>
+  Customer Email
+</p>
+
+<button appHighlight>
+  Select Customer
+</button>
 ```
 
-The component property becomes:
+All three elements use the same directive implementation.
+
+# Practical Project Structure
+
+After implementing this lesson:
 
 ```text
-name = "Ahmed"
+my-angular-application/
+├── public/
+│
+├── src/
+│   ├── app/
+│   │   ├── directives/
+│   │   │   ├── highlight.ts
+│   │   │   └── highlight.spec.ts
+│   │   │
+│   │   ├── customer/
+│   │   │   ├── customer.ts
+│   │   │   ├── customer.html
+│   │   │   ├── customer.css
+│   │   │   └── customer.spec.ts
+│   │   │
+│   │   ├── app.ts
+│   │   ├── app.html
+│   │   ├── app.css
+│   │   ├── app.config.ts
+│   │   └── app.routes.ts
+│   │
+│   ├── index.html
+│   ├── main.ts
+│   └── styles.css
+│
+├── angular.json
+├── package.json
+├── package-lock.json
+├── tsconfig.json
+├── tsconfig.app.json
+├── tsconfig.spec.json
+├── .editorconfig
+├── .gitignore
+└── README.md
 ```
-
-and the paragraph automatically becomes:
-
-```text
-Current Name: Ahmed
-```
-
-# Data Binding Summary
-
-```text
-                    Angular Component
-                           │
-             ┌─────────────┼─────────────┐
-             │             │             │
-             ▼             ▼             ▼
-       Interpolation   Property      Attribute
-             │         Binding        Binding
-             │             │             │
-             └─────────────┼─────────────┘
-                           ▼
-                        Template
-                           │
-                           │
-                    Event Binding
-                           │
-                           ▼
-                      Component
-
-                 Two-Way Binding
-                    Component
-                       ↕
-                    Template
-```
-
-# Best Practices
-
-- Use interpolation primarily to display values.
-- Use property binding when binding to DOM or component properties.
-- Use attribute binding for HTML attributes such as ARIA and custom attributes.
-- Use event binding to respond to user actions.
-- Use two-way binding when the UI and component state need to stay synchronized.
-- Keep event handlers small and focused.
-- Prefer explicit property binding instead of interpolation when binding DOM properties.
-- Avoid putting complex business logic directly inside templates.
-- Use services when business logic becomes reusable or complex.
 
 # Quick Revision
 
-| Concept | Syntax | Direction |
+| Concept | Purpose | Example |
 |---|---|---|
-| Interpolation | `{{ name }}` | Component → Template |
-| Property binding | `[disabled]="isDisabled"` | Component → Template |
-| Attribute binding | `[attr.aria-label]="label"` | Component → Template |
-| Event binding | `(click)="selectCustomer()"` | Template → Component |
-| Two-way binding | `[(ngModel)]="name"` | Component ↔ Template |
+| Attribute directive | Change behavior/appearance | `[ngClass]` |
+| Structural directive | Change template structure | `*ngIf`, `*ngFor` |
+| Modern control flow | Modern template control flow | `@if`, `@for` |
+| Custom directive | Create reusable behavior | `[appHighlight]` |
+| `@Directive` | Define a directive | `@Directive({...})` |
+| `selector` | Define where directive applies | `[appHighlight]` |
+| `HostListener` | Listen to host events | `@HostListener('mouseenter')` |
+| `ElementRef` | Access host element | `elementRef.nativeElement` |
 
 # Key Takeaways
 
-- Data binding connects Angular component data with the template.
-- Interpolation displays component values.
-- Property binding sets DOM or component properties.
-- Attribute binding sets HTML attributes.
-- Event binding responds to user actions.
-- Two-way binding synchronizes component state and the UI.
-- `FormsModule` is required when using `[(ngModel)]`.
-- Angular provides different binding mechanisms for different communication directions.
+- Directives add behavior or appearance to existing elements.
+- Attribute directives work with existing elements.
+- Structural directives change the structure of the DOM.
+- Angular 21 provides modern control flow such as `@if` and `@for`.
+- Custom directives are created using `@Directive`.
+- A directive is reusable across multiple elements.
+- Standalone components import the directives they use directly.
+- `@HostListener` can be used to respond to host element events.
+- `ElementRef` provides access to the directive's host element.
