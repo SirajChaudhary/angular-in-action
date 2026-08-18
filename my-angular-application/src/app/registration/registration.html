@@ -1,0 +1,115 @@
+<h2>User Registration</h2>
+
+<form #registrationForm="ngForm" (ngSubmit)="register()">
+
+  <div>
+    <label for="fullName">Full Name:</label>
+
+    <input
+      id="fullName"
+      name="fullName"
+      type="text"
+      [(ngModel)]="fullName"
+      #fullNameControl="ngModel"
+      required
+      minlength="3">
+
+    @if (fullNameControl.touched &&
+         fullNameControl.hasError('required')) {
+      <p>Full name is required.</p>
+    }
+
+    @if (fullNameControl.touched &&
+         fullNameControl.hasError('minlength')) {
+      <p>Full name must contain at least 3 characters.</p>
+    }
+  </div>
+
+  <div>
+    <label for="email">Email:</label>
+
+    <input
+      id="email"
+      name="email"
+      type="email"
+      [(ngModel)]="email"
+      #emailControl="ngModel"
+      required
+      email>
+
+    @if (emailControl.touched &&
+         emailControl.hasError('required')) {
+      <p>Email is required.</p>
+    }
+
+    @if (emailControl.touched &&
+         emailControl.hasError('email')) {
+      <p>Enter a valid email address.</p>
+    }
+  </div>
+
+  <div>
+    <label for="password">Password:</label>
+
+    <input
+      id="password"
+      name="password"
+      type="password"
+      [(ngModel)]="password"
+      #passwordControl="ngModel"
+      required
+      minlength="8">
+
+    @if (passwordControl.touched &&
+         passwordControl.hasError('required')) {
+      <p>Password is required.</p>
+    }
+
+    @if (passwordControl.touched &&
+         passwordControl.hasError('minlength')) {
+      <p>Password must contain at least 8 characters.</p>
+    }
+  </div>
+
+  <div>
+    <label for="confirmPassword">Confirm Password:</label>
+
+    <input
+      id="confirmPassword"
+      name="confirmPassword"
+      type="password"
+      [(ngModel)]="confirmPassword"
+      #confirmPasswordControl="ngModel"
+      required>
+
+    @if (confirmPasswordControl.touched &&
+         confirmPasswordControl.hasError('required')) {
+      <p>Please confirm your password.</p>
+    }
+  </div>
+
+  <div>
+    <label class="checkbox-label">
+      <input
+        type="checkbox"
+        name="acceptTerms"
+        [(ngModel)]="acceptTerms"
+        #termsControl="ngModel"
+        required>
+
+      I accept the terms and conditions.
+    </label>
+
+    @if (termsControl.touched &&
+         termsControl.invalid) {
+      <p>You must accept the terms and conditions.</p>
+    }
+  </div>
+
+  <button
+    type="submit"
+    [disabled]="registrationForm.invalid">
+    Register
+  </button>
+
+</form>

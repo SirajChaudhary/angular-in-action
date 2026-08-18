@@ -1,0 +1,44 @@
+form {
+  width: 400px;
+}
+
+form > div {
+  margin-bottom: 16px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  font-weight: normal;
+}
+
+p {
+  margin: 5px 0 0;
+}
+
+button {
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}

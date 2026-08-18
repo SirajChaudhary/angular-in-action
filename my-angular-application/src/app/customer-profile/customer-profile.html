@@ -1,0 +1,148 @@
+<h2>Customer Profile</h2>
+
+<form [formGroup]="customerForm" (ngSubmit)="saveProfile()">
+
+  <div>
+    <label for="fullName">Full Name:</label>
+
+    <input
+      id="fullName"
+      type="text"
+      formControlName="fullName">
+
+    @if (customerForm.controls.fullName.touched &&
+         customerForm.controls.fullName.hasError('required')) {
+      <p>Full name is required.</p>
+    }
+
+    @if (customerForm.controls.fullName.touched &&
+         customerForm.controls.fullName.hasError('minlength')) {
+      <p>Full name must contain at least 3 characters.</p>
+    }
+  </div>
+
+  <div>
+    <label for="email">Email:</label>
+
+    <input
+      id="email"
+      type="email"
+      formControlName="email">
+
+    @if (customerForm.controls.email.touched &&
+         customerForm.controls.email.hasError('required')) {
+      <p>Email is required.</p>
+    }
+
+    @if (customerForm.controls.email.touched &&
+         customerForm.controls.email.hasError('email')) {
+      <p>Enter a valid email address.</p>
+    }
+  </div>
+
+  <div>
+    <label for="phone">Phone:</label>
+
+    <input
+      id="phone"
+      type="tel"
+      formControlName="phone">
+
+    @if (customerForm.controls.phone.touched &&
+         customerForm.controls.phone.hasError('required')) {
+      <p>Phone number is required.</p>
+    }
+
+    @if (customerForm.controls.phone.touched &&
+         customerForm.controls.phone.hasError('pattern')) {
+      <p>Enter a valid 10-digit phone number.</p>
+    }
+  </div>
+
+  <div>
+    <label for="dateOfBirth">Date of Birth:</label>
+
+    <input
+      id="dateOfBirth"
+      type="date"
+      formControlName="dateOfBirth">
+
+    @if (customerForm.controls.dateOfBirth.touched &&
+         customerForm.controls.dateOfBirth.hasError('required')) {
+      <p>Date of birth is required.</p>
+    }
+  </div>
+
+  <div>
+    <label for="address">Address:</label>
+
+    <textarea
+      id="address"
+      formControlName="address">
+    </textarea>
+
+    @if (customerForm.controls.address.touched &&
+         customerForm.controls.address.hasError('required')) {
+      <p>Address is required.</p>
+    }
+
+    @if (customerForm.controls.address.touched &&
+         customerForm.controls.address.hasError('minlength')) {
+      <p>Address must contain at least 10 characters.</p>
+    }
+  </div>
+
+  <div>
+    <label for="city">City:</label>
+
+    <input
+      id="city"
+      type="text"
+      formControlName="city">
+
+    @if (customerForm.controls.city.touched &&
+         customerForm.controls.city.hasError('required')) {
+      <p>City is required.</p>
+    }
+  </div>
+
+  <div>
+    <label for="state">State:</label>
+
+    <input
+      id="state"
+      type="text"
+      formControlName="state">
+
+    @if (customerForm.controls.state.touched &&
+         customerForm.controls.state.hasError('required')) {
+      <p>State is required.</p>
+    }
+  </div>
+
+  <div>
+    <label for="pinCode">PIN Code:</label>
+
+    <input
+      id="pinCode"
+      type="text"
+      formControlName="pinCode">
+
+    @if (customerForm.controls.pinCode.touched &&
+         customerForm.controls.pinCode.hasError('required')) {
+      <p>PIN code is required.</p>
+    }
+
+    @if (customerForm.controls.pinCode.touched &&
+         customerForm.controls.pinCode.hasError('pattern')) {
+      <p>Enter a valid 6-digit PIN code.</p>
+    }
+  </div>
+
+  <button
+    type="submit"
+    [disabled]="customerForm.invalid">
+    Save Profile
+  </button>
+
+</form>

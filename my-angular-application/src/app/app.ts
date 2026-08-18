@@ -1,13 +1,9 @@
 import { Component, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { CustomerProfile } from './customer-profile/customer-profile';
 
 @Component({
   selector: 'app-root',
-  imports: [
-    RouterOutlet,
-    RouterLink,
-    RouterLinkActive
-  ],
+  imports: [CustomerProfile],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

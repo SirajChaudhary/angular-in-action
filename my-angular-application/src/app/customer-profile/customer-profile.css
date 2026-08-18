@@ -1,0 +1,41 @@
+form {
+    width: 400px;
+  }
+  
+  form > div {
+    margin-bottom: 16px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="date"],
+  textarea {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+  
+  textarea {
+    min-height: 80px;
+    resize: vertical;
+  }
+  
+  p {
+    margin: 5px 0 0;
+  }
+  
+  button {
+    padding: 8px 16px;
+    cursor: pointer;
+  }
+  
+  button:disabled {
+    cursor: not-allowed;
+  }
