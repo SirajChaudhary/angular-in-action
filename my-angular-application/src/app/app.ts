@@ -3,12 +3,12 @@ import {
 } from '@angular/core';
 
 import {
-  Customer
-} from './customer/customer';
+  RouterOutlet
+} from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [Customer],
+  imports: [RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

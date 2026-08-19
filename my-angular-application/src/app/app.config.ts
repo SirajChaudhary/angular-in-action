@@ -1,4 +1,10 @@
-import { ApplicationConfig } from '@angular/core';
+import {
+  ApplicationConfig
+} from '@angular/core';
+
+import {
+  provideRouter
+} from '@angular/router';
 
 import {
   provideHttpClient,
@@ -6,15 +12,25 @@ import {
 } from '@angular/common/http';
 
 import {
-  loggingInterceptor
-} from './interceptors/logging-interceptor';
+  routes
+} from './app.routes';
+
+import {
+  authInterceptor
+} from './interceptors/auth-interceptor';
 
 export const appConfig: ApplicationConfig = {
+
   providers: [
+
+    provideRouter(routes),
+
     provideHttpClient(
       withInterceptors([
-        loggingInterceptor
+        authInterceptor
       ])
     )
+
   ]
+
 };
