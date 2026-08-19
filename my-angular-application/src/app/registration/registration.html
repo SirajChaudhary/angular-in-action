@@ -1,0 +1,124 @@
+<div class="container mt-5">
+
+    <div class="row justify-content-center">
+  
+      <div class="col-md-8 col-lg-6">
+  
+        <div class="card shadow">
+  
+          <div class="card-body p-4">
+  
+            <h2 class="text-center mb-4">
+              Registration
+            </h2>
+  
+            <form
+              (ngSubmit)="register()">
+  
+              <div class="row">
+  
+                <div class="col-md-6 mb-3">
+  
+                  <label
+                    for="firstName"
+                    class="form-label">
+  
+                    First Name
+  
+                  </label>
+  
+                  <input
+                    id="firstName"
+                    type="text"
+                    class="form-control"
+                    name="firstName"
+                    [(ngModel)]="firstName"
+                    required
+                  />
+  
+                </div>
+  
+                <div class="col-md-6 mb-3">
+  
+                  <label
+                    for="lastName"
+                    class="form-label">
+  
+                    Last Name
+  
+                  </label>
+  
+                  <input
+                    id="lastName"
+                    type="text"
+                    class="form-control"
+                    name="lastName"
+                    [(ngModel)]="lastName"
+                    required
+                  />
+  
+                </div>
+  
+              </div>
+  
+              <div class="mb-3">
+  
+                <label
+                  for="email"
+                  class="form-label">
+  
+                  Email
+  
+                </label>
+  
+                <input
+                  id="email"
+                  type="email"
+                  class="form-control"
+                  name="email"
+                  [(ngModel)]="email"
+                  required
+                />
+  
+              </div>
+  
+              <div class="mb-3">
+  
+                <label
+                  for="password"
+                  class="form-label">
+  
+                  Password
+  
+                </label>
+  
+                <input
+                  id="password"
+                  type="password"
+                  class="form-control"
+                  name="password"
+                  [(ngModel)]="password"
+                  required
+                />
+  
+              </div>
+  
+              <button
+                type="submit"
+                class="btn btn-primary w-100">
+  
+                Register
+  
+              </button>
+  
+            </form>
+  
+          </div>
+  
+        </div>
+  
+      </div>
+  
+    </div>
+  
+  </div>
