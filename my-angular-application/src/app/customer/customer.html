@@ -1,7 +1,22 @@
-<h2>HostListener + HostBinding</h2>
+<h1>Customer List</h1>
 
-<div appHoverCard>
-  <h3>Customer Card</h3>
+<button (click)="loadCustomers()">
+  Load Customers
+</button>
 
-  <p>Move your mouse over this card.</p>
-</div>
+@if (customers.length > 0) {
+
+  <ul>
+
+    @for (customer of customers; track customer.id) {
+
+      <li>
+        {{ customer.id }} -
+        {{ customer.name }} -
+        {{ customer.email }}
+      </li>
+
+    }
+
+  </ul>
+}

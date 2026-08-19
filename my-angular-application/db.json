@@ -1,0 +1,19 @@
+{
+    "customers": [
+      {
+        "id": 1,
+        "name": "Siraj Chaudhary",
+        "email": "siraj@example.com"
+      },
+      {
+        "id": 2,
+        "name": "Ahmed Khan",
+        "email": "ahmed@example.com"
+      },
+      {
+        "id": 3,
+        "name": "Priya Sharma",
+        "email": "priya@example.com"
+      }
+    ]
+  }

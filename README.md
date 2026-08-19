@@ -1,502 +1,858 @@
-# Lesson 15 — Asynchronous Programming & RxJS
+# Lesson 16 — HTTP Interceptors
 
-# Asynchronous Programming
+# What Is an HTTP Interceptor
 
-Asynchronous programming allows an application to start an operation and handle its result later, without waiting synchronously for the operation to finish.
+An HTTP interceptor allows Angular to intercept HTTP requests and responses before they reach their final destination.
 
-Common examples include:
+Interceptors are useful when the same HTTP behavior needs to be applied to multiple API requests.
 
-- HTTP requests
-- Database operations
-- File operations
-- Timers
-- User events
-- API calls
+Common use cases include:
 
-### Synchronous
+- Adding HTTP headers
+- Adding authentication tokens
+- Logging requests and responses
+- Handling HTTP errors centrally
+- Adding common request information
+- Retry logic
+- Showing and hiding loading indicators
 
-In synchronous programming, the next operation waits for the current operation to complete.
-
-```typescript
-const result = calculateValue();
-
-console.log(result);
-```
-
-### Asynchronous
-
-In asynchronous programming, the application can continue other work while waiting for the result.
-
-```typescript
-const promise = loadData();
-
-promise.then(result => {
-  console.log(result);
-});
-
-console.log('Continue working...');
-```
-
-# Types of Asynchronous Programming
-
-Common approaches include:
-
-1. Callback
-2. Promise
-3. `async` / `await`
-4. Observable
-5. Reactive Programming with RxJS
-
-| Type | Purpose |
-|---|---|
-| Callback | Executes a function after an operation completes |
-| Promise | Represents a future single result |
-| `async` / `await` | Provides simpler syntax for Promise-based operations |
-| Observable | Represents a stream of values over time |
-| RxJS | Provides Observables and operators for reactive programming |
-
-### 1. Callback
-
-A callback is a function passed to another function and executed later.
-
-```typescript
-setTimeout(() => {
-  console.log('Operation completed');
-}, 1000);
-```
-
-Key Points
-
-- A callback is executed after an operation completes.
-- Multiple nested callbacks can make code difficult to maintain.
-- Promises provide a cleaner approach for many asynchronous operations.
-
-### 2. Promise
-
-A Promise represents the eventual result of an asynchronous operation.
-
-A Promise has three states:
-
-| State | Meaning |
-|---|---|
-| Pending | Operation is still running |
-| Fulfilled | Operation completed successfully |
-| Rejected | Operation failed |
-
-```typescript
-const promise = new Promise<string>(resolve => {
-  resolve('Data received');
-});
-
-promise.then(result => {
-  console.log(result);
-});
-```
-
-### 3. `async` / `await`
-
-`async` and `await` provide cleaner syntax for working with Promises.
-
-```typescript
-async function loadData(): Promise<string> {
-  const result = await getData();
-
-  return result;
-}
-```
-
-Key Points
-
-- `async` defines an asynchronous function.
-- `await` waits for a Promise result inside that function.
-- An `async` function returns a Promise.
-
-### 4. Observable
-
-An Observable represents a stream of values that can be emitted over time.
-
-```typescript
-import { Observable } from 'rxjs';
-
-const numbers$ = new Observable<number>(subscriber => {
-  subscriber.next(1);
-  subscriber.next(2);
-  subscriber.next(3);
-
-  subscriber.complete();
-});
-```
-
-Subscribe to the Observable:
-
-```typescript
-numbers$.subscribe(value => {
-  console.log(value);
-});
-```
-
-Output:
+The request flow becomes:
 
 ```text
-1
-2
-3
+Angular Component
+       ↓
+CustomerService
+       ↓
+HTTP Interceptor
+       ↓
+HttpClient
+       ↓
+Backend API
+       ↓
+HTTP Response
+       ↓
+HTTP Interceptor
+       ↓
+Component
 ```
 
-Key Points
+# Functional HTTP Interceptors
 
-- An Observable can emit multiple values.
-- An Observable can emit values over time.
-- An Observable normally starts executing when subscribed to.
-- An Observable can be unsubscribed from.
-- Angular `HttpClient` returns Observables.
+Modern Angular applications can use functional interceptors.
 
-### 5. Reactive Programming with RxJS
-
-Reactive programming is an approach based on reacting to values, events, and asynchronous data streams.
-
-```text
-Data/Event Source
-       ↓
-Observable
-       ↓
-RxJS Operators
-       ↓
-Subscriber
-       ↓
-Application/UI
-```
-
-# RxJS
-
-**RxJS (Reactive Extensions for JavaScript)** is a library for working with asynchronous data streams and events.
-
-Angular uses RxJS extensively for:
-
-- HTTP requests
-- User input
-- Reactive forms
-- Router events
-- Event streams
-- Asynchronous operations
-
-The central concept in RxJS is the **Observable**.
-
-# Observer
-
-An Observer defines how to handle Observable notifications.
+A functional interceptor is a function that receives the outgoing request and the next handler in the HTTP chain.
 
 ```typescript
-const observer = {
-  next: (value: number) => {
-    console.log('Value:', value);
-  },
+import { HttpInterceptorFn } from '@angular/common/http';
 
-  error: (error: unknown) => {
-    console.error('Error:', error);
-  },
+export const loggingInterceptor: HttpInterceptorFn =
+  (req, next) => {
 
-  complete: () => {
-    console.log('Completed');
-  }
-};
+    console.log(
+      'HTTP Request:',
+      req.method,
+      req.url
+    );
+
+    return next(req);
+  };
 ```
 
-Use it with:
+The interceptor must call:
 
 ```typescript
-numbers$.subscribe(observer);
+next(req)
 ```
 
-Observable Notifications
+to continue the HTTP request.
 
-| Notification | Purpose |
-|---|---|
-| `next` | Receives an emitted value |
-| `error` | Handles an error |
-| `complete` | Handles completion |
+# Why Use Interceptors
 
-# Subscription
-
-A Subscription represents an active Observable execution.
+Without an interceptor, common logic may have to be repeated:
 
 ```typescript
-const subscription = numbers$.subscribe({
-  next: value => {
-    console.log(value);
+this.http.get(url, {
+  headers: {
+    Authorization: 'Bearer token'
   }
 });
 ```
 
-A subscription can be cancelled:
-
-```typescript
-subscription.unsubscribe();
-```
-
-Subscription management is important for long-running Observables.
-
-# Observable vs Promise
-
-| Feature | Promise | Observable |
-|---|---|---|
-| Result | Usually one | Zero, one, or many |
-| Lazy | No | Yes |
-| Cancellation | Limited | `unsubscribe()` |
-| Operators | Limited | Many RxJS operators |
-| Streams | No | Yes |
-| Angular HttpClient | No | Yes |
-
-# RxJS Operators
-
-| Operator | Purpose |
-|---|---|
-| `map()` | Transform values |
-| `filter()` | Filter values |
-| `tap()` | Perform side effects |
-| `switchMap()` | Switch to the latest Observable |
-| `mergeMap()` | Run inner Observables concurrently |
-| `concatMap()` | Run inner Observables sequentially |
-| `exhaustMap()` | Ignore new values while current operation runs |
-| `catchError()` | Handle errors |
-| `retry()` | Retry failed operations |
-| `debounceTime()` | Wait for inactivity |
-| `distinctUntilChanged()` | Ignore consecutive duplicate values |
-| `take()` | Take a specific number of values |
-| `finalize()` | Perform cleanup |
-
-# `pipe()`
-
-RxJS operators are commonly combined using `pipe()`.
-
-```typescript
-numbers$
-  .pipe(
-    map(value => value * 2),
-    filter(value => value > 2)
-  )
-  .subscribe(value => {
-    console.log(value);
-  });
-```
-
-# Common RxJS Examples
-
-### `map()`
-
-Transforms emitted values.
-
-```typescript
-of(1, 2, 3)
-  .pipe(
-    map(value => value * 10)
-  )
-  .subscribe(value => {
-    console.log(value);
-  });
-```
-
-### `filter()`
-
-Filters emitted values.
-
-```typescript
-of(1, 2, 3, 4)
-  .pipe(
-    filter(value => value % 2 === 0)
-  )
-  .subscribe(value => {
-    console.log(value);
-  });
-```
-
-### `catchError()`
-
-Handles an Observable error.
-
-```typescript
-this.http.get<Customer[]>('/api/customers')
-  .pipe(
-    catchError(error => {
-      console.error(error);
-      return of([]);
-    })
-  )
-  .subscribe(customers => {
-    console.log(customers);
-  });
-```
-
-### `retry()`
-
-Retries a failed operation.
-
-```typescript
-this.http.get<Customer[]>('/api/customers')
-  .pipe(
-    retry(2)
-  )
-  .subscribe();
-```
-
-### `debounceTime()`
-
-Waits for a period of inactivity.
-
-This is commonly used for search fields.
-
-```typescript
-searchTerm$
-  .pipe(
-    debounceTime(300)
-  )
-  .subscribe(term => {
-    console.log(term);
-  });
-```
-
-### `switchMap()`
-
-Switches to the latest Observable.
-
-It is commonly used for search operations.
-
-```typescript
-searchTerm$
-  .pipe(
-    switchMap(term =>
-      this.searchCustomers(term)
-    )
-  )
-  .subscribe(customers => {
-    console.log(customers);
-  });
-```
-
-### Concept
-
-```text
-User types
-   ↓
-Search request A
-   ↓
-User types again
-   ↓
-Switch to request B
-   ↓
-Use latest result
-```
-
-# Angular HttpClient and Observables
-
-Angular `HttpClient` returns Observables.
-
-```typescript
-this.http.get<Customer[]>('/api/customers');
-```
-
-The return type is:
-
-```text
-Observable<Customer[]>
-```
-
-The response can be handled using `subscribe()`:
-
-```typescript
-this.http.get<Customer[]>('/api/customers')
-  .subscribe({
-    next: customers => {
-      console.log(customers);
-    },
-
-    error: error => {
-      console.error(error);
-    }
-  });
-```
-
-The flow is:
+With an interceptor, common logic can be centralized.
 
 ```text
 HTTP Request
      ↓
-Observable
+Interceptor
      ↓
-HTTP Response
+Add common header
      ↓
-next()
-     ↓
-Application
+Backend
 ```
 
-# Async Pipe
+# Practical Example — HTTP Logging Interceptor
 
-Angular provides the `async` pipe for working with Observables and Promises directly in templates.
+In this example, we will create a functional interceptor that logs:
 
-Example:
+- HTTP method
+- Request URL
+- Response status
 
-```typescript
-message$ = of('Hello from Observable');
+We will use a simple Customer REST API.
+
+### Step 1 — Create the Angular Project
+
+Create the Angular project:
+
+```bash
+ng new my-angular-application
 ```
 
-Template:
+Move into the project:
 
-```html
-<p>{{ message$ | async }}</p>
+```bash
+cd my-angular-application
 ```
 
-The `async` pipe:
+Create the Customer component:
 
-- Subscribes to the Observable or Promise.
-- Displays the emitted value.
-- Updates the template when a new value arrives.
-- Helps manage subscription cleanup.
+```bash
+ng g c customer
+```
 
-# Asynchronous Programming vs Reactive Programming
+Create the Customer service:
 
-These concepts are related but not identical.
+```bash
+ng g s services/customer
+```
 
-| Concept | Meaning |
-|---|---|
-| Asynchronous | Handles results that become available later |
-| Non-blocking | Does not remain blocked waiting for I/O |
-| Reactive | Works with streams of values/events |
-| RxJS | JavaScript library providing reactive programming capabilities |
+Create the interceptor:
 
-A typical Angular HTTP flow is:
+```bash
+ng g interceptor interceptors/logging
+```
+
+Angular CLI creates the interceptor file as:
 
 ```text
-Asynchronous Operation
-        ↓
-HttpClient
-        ↓
-Observable
-        ↓
-RxJS Operators
-        ↓
-Subscription
-        ↓
-Update UI
+src/app/interceptors/logging-interceptor.ts
 ```
+
+The important files will be:
+
+```text
+src/app/
+├── customer/
+│   ├── customer.ts
+│   ├── customer.html
+│   └── customer.css
+│
+├── services/
+│   └── customer.service.ts
+│
+└── interceptors/
+    └── logging-interceptor.ts
+```
+
+### Step 2 — Configure HttpClient
+
+Open:
+
+```text
+src/app/app.config.ts
+```
+
+Configure `HttpClient` with the interceptor:
+
+```typescript
+import { ApplicationConfig } from '@angular/core';
+
+import {
+  provideHttpClient,
+  withInterceptors
+} from '@angular/common/http';
+
+import {
+  loggingInterceptor
+} from './interceptors/logging-interceptor';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideHttpClient(
+      withInterceptors([
+        loggingInterceptor
+      ])
+    )
+  ]
+};
+```
+
+`withInterceptors()` registers functional HTTP interceptors.
+
+### Step 3 — Create the Logging Interceptor
+
+Open:
+
+```text
+src/app/interceptors/logging-interceptor.ts
+```
+
+Use:
+
+```typescript
+import {
+  HttpInterceptorFn,
+  HttpResponse
+} from '@angular/common/http';
+
+import {
+  tap
+} from 'rxjs';
+
+export const loggingInterceptor: HttpInterceptorFn =
+  (req, next) => {
+
+    console.log(
+      'HTTP Request:',
+      req.method,
+      req.url
+    );
+
+    return next(req).pipe(
+
+      tap({
+        next: response => {
+
+          if (response instanceof HttpResponse) {
+
+            console.log(
+              'HTTP Response:',
+              response.status,
+              req.url
+            );
+
+          }
+
+        }
+      })
+
+    );
+  };
+```
+
+`req` represents the outgoing HTTP request.
+
+`next` passes the request to the next interceptor or to the backend.
+
+`response.status` contains the HTTP response status.
+
+### Step 4 — Create the Customer Service
+
+Open:
+
+```text
+src/app/services/customer.service.ts
+```
+
+Use:
+
+```typescript
+import {
+  Injectable,
+  inject
+} from '@angular/core';
+
+import {
+  HttpClient
+} from '@angular/common/http';
+
+import {
+  Observable
+} from 'rxjs';
+
+export interface CustomerModel {
+  id: number;
+  name: string;
+  email: string;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class CustomerService {
+
+  private http = inject(HttpClient);
+
+  private apiUrl =
+    'http://localhost:3000/customers';
+
+  getCustomers(): Observable<CustomerModel[]> {
+
+    return this.http.get<CustomerModel[]>(
+      this.apiUrl
+    );
+  }
+}
+```
+
+The interface is named `CustomerModel` to avoid a name conflict with the `Customer` component class.
+
+### Step 5 — Create Sample API Data
+
+Create:
+
+```text
+db.json
+```
+
+at the project root:
+
+```json
+{
+  "customers": [
+    {
+      "id": 1,
+      "name": "Siraj Chaudhary",
+      "email": "siraj@example.com"
+    },
+    {
+      "id": 2,
+      "name": "Ahmed Khan",
+      "email": "ahmed@example.com"
+    },
+    {
+      "id": 3,
+      "name": "Priya Sharma",
+      "email": "priya@example.com"
+    }
+  ]
+}
+```
+
+Install JSON Server if it is not already installed:
+
+```bash
+npm install -g json-server
+```
+
+Start the API:
+
+```bash
+json-server --watch db.json
+```
+
+The API will be available at:
+
+```text
+http://localhost:3000/customers
+```
+
+### Step 6 — Use HttpClient from the Customer Component
+
+Open:
+
+```text
+src/app/customer/customer.ts
+```
+
+Use:
+
+```typescript
+import {
+  Component,
+  inject
+} from '@angular/core';
+
+import {
+  CustomerService,
+  CustomerModel
+} from '../services/customer.service';
+
+@Component({
+  selector: 'app-customer',
+  imports: [],
+  templateUrl: './customer.html',
+  styleUrl: './customer.css'
+})
+export class Customer {
+
+  private customerService =
+    inject(CustomerService);
+
+  customers: CustomerModel[] = [];
+
+  loadCustomers(): void {
+
+    this.customerService
+      .getCustomers()
+      .subscribe({
+        next: customers => {
+
+          this.customers = customers;
+
+        },
+
+        error: error => {
+
+          console.error(
+            'Failed to load customers:',
+            error
+          );
+
+        }
+      });
+  }
+}
+```
+
+### Step 7 — Display Customers
+
+Open:
+
+```text
+src/app/customer/customer.html
+```
+
+Use:
+
+```html
+<h1>Customer List</h1>
+
+<button (click)="loadCustomers()">
+  Load Customers
+</button>
+
+@if (customers.length > 0) {
+
+  <ul>
+
+    @for (customer of customers; track customer.id) {
+
+      <li>
+        {{ customer.id }} -
+        {{ customer.name }} -
+        {{ customer.email }}
+      </li>
+
+    }
+
+  </ul>
+}
+```
+
+### Step 8 — Add the Customer Component to the Application
+
+Open:
+
+```text
+src/app/app.ts
+```
+
+Use:
+
+```typescript
+import {
+  Component
+} from '@angular/core';
+
+import {
+  Customer
+} from './customer/customer';
+
+@Component({
+  selector: 'app-root',
+  imports: [Customer],
+  templateUrl: './app.html',
+  styleUrl: './app.css'
+})
+export class App {
+}
+```
+
+Open:
+
+```text
+src/app/app.html
+```
+
+Use:
+
+```html
+<app-customer></app-customer>
+```
+
+### Step 9 — Run the Application
+
+Start JSON Server:
+
+```bash
+json-server --watch db.json
+```
+
+In another terminal:
+
+```bash
+ng serve
+```
+
+Open:
+
+```text
+http://localhost:4200
+```
+
+Click:
+
+```text
+Load Customers
+```
+
+The request will pass through the logging interceptor.
+
+### Step 10 — Verify the Interceptor
+
+Open the browser Developer Tools and select the Console.
+
+You should see something similar to:
+
+```text
+HTTP Request: GET http://localhost:3000/customers
+
+HTTP Response: 200 http://localhost:3000/customers
+```
+
+This confirms that the interceptor is processing the request and response.
+<br /><br />
+<img width="3840" height="1524" alt="image" src="https://github.com/user-attachments/assets/bb0f0731-66b2-43f3-83f1-1ca995893ae5" />
+
+# Adding HTTP Headers
+
+Interceptors can modify outgoing requests.
+
+For example, we can add a custom header:
+
+```typescript
+import {
+  HttpInterceptorFn
+} from '@angular/common/http';
+
+export const headerInterceptor: HttpInterceptorFn =
+  (req, next) => {
+
+    const modifiedRequest = req.clone({
+      setHeaders: {
+        'X-Application': 'Angular-App'
+      }
+    });
+
+    return next(modifiedRequest);
+  };
+```
+
+The original request should not be modified directly.
+
+Angular's `HttpRequest` is immutable, so use:
+
+```typescript
+req.clone()
+```
+
+to create a modified request.
+
+# Registering Multiple Interceptors
+
+Multiple functional interceptors can be registered together.
+
+```typescript
+provideHttpClient(
+  withInterceptors([
+    loggingInterceptor,
+    headerInterceptor
+  ])
+)
+```
+
+The request passes through the interceptor chain:
+
+```text
+Component
+    ↓
+loggingInterceptor
+    ↓
+headerInterceptor
+    ↓
+HttpClient
+    ↓
+Backend
+```
+
+# Centralized HTTP Error Handling
+
+Interceptors can also provide centralized error handling.
+
+This avoids repeating the same error-handling logic in every component.
+
+### Step 1 — Create the Error Interceptor
+
+Create:
+
+```text
+src/app/interceptors/error-interceptor.ts
+```
+
+Use:
+
+```typescript
+import {
+  HttpErrorResponse,
+  HttpInterceptorFn
+} from '@angular/common/http';
+
+import {
+  catchError,
+  throwError
+} from 'rxjs';
+
+export const errorInterceptor: HttpInterceptorFn =
+  (req, next) => {
+
+    return next(req).pipe(
+
+      catchError((error: HttpErrorResponse) => {
+
+        console.error(
+          'HTTP Error:',
+          error.status,
+          error.message
+        );
+
+        return throwError(() => error);
+
+      })
+
+    );
+  };
+```
+
+### Step 2 — Register the Error Interceptor
+
+Open:
+
+```text
+src/app/app.config.ts
+```
+
+Register it:
+
+```typescript
+import {
+  ApplicationConfig
+} from '@angular/core';
+
+import {
+  provideHttpClient,
+  withInterceptors
+} from '@angular/common/http';
+
+import {
+  loggingInterceptor
+} from './interceptors/logging-interceptor';
+
+import {
+  errorInterceptor
+} from './interceptors/error-interceptor';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideHttpClient(
+      withInterceptors([
+        loggingInterceptor,
+        errorInterceptor
+      ])
+    )
+  ]
+};
+```
+
+### Step 3 — Test the Error Interceptor
+
+Change the API URL temporarily to an invalid endpoint:
+
+```typescript
+private apiUrl =
+  'http://localhost:3000/invalid-customers';
+```
+
+Click:
+
+```text
+Load Customers
+```
+
+The request will fail.
+
+The interceptor will receive the error and log information such as:
+
+```text
+HTTP Error: 404
+```
+
+The error can still be handled by the component:
+
+```typescript
+this.customerService
+  .getCustomers()
+  .subscribe({
+    next: customers => {
+      this.customers = customers;
+    },
+
+    error: error => {
+      console.error(
+        'Component error:',
+        error
+      );
+    }
+  });
+```
+
+The interceptor provides centralized processing, while the component can still decide how the UI should respond.
+
+# Adding Authentication Headers
+
+A common real-world use of an interceptor is adding an authentication token.
+
+For example:
+
+```typescript
+export const authInterceptor: HttpInterceptorFn =
+  (req, next) => {
+
+    const token =
+      localStorage.getItem('token');
+
+    if (!token) {
+      return next(req);
+    }
+
+    const modifiedRequest = req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    return next(modifiedRequest);
+  };
+```
+
+The request becomes:
+
+```text
+Authorization: Bearer <token>
+```
+
+This approach will be used more extensively in the Authentication & Authorization lesson.
+
+# Interceptor Responsibilities
+
+| Responsibility | Example |
+|---|---|
+| Logging | Log request method and URL |
+| Headers | Add common HTTP headers |
+| Authentication | Add JWT token |
+| Error handling | Handle HTTP errors centrally |
+| Retry | Retry failed requests |
+| Loading state | Track active requests |
+| Request modification | Change headers or URL |
+| Response processing | Inspect or transform responses |
+
+# Interceptor vs Service
+
+| Service | Interceptor |
+|---|---|
+| Contains API-specific logic | Contains common HTTP behavior |
+| Knows about business operations | Usually independent of a specific API |
+| Calls `HttpClient` | Intercepts `HttpClient` requests |
+| Example: `getCustomers()` | Example: add authorization header |
+| Used by components | Applied automatically to configured requests |
+
+A good architecture is:
+
+```text
+Component
+    ↓
+CustomerService
+    ↓
+HttpClient
+    ↓
+Interceptors
+    ↓
+Backend API
+```
+
+# Practical Project Structure
+
+After implementing this lesson:
+
+```text
+my-angular-application/
+├── src/
+│   └── app/
+│       ├── customer/
+│       │   ├── customer.ts
+│       │   ├── customer.html
+│       │   ├── customer.css
+│       │   └── customer.spec.ts
+│       │
+│       ├── services/
+│       │   ├── customer.service.ts
+│       │   └── customer.service.spec.ts
+│       │
+│       ├── interceptors/
+│       │   ├── logging-interceptor.ts
+│       │   └── error-interceptor.ts
+│       │
+│       ├── app.ts
+│       ├── app.html
+│       ├── app.css
+│       ├── app.config.ts
+│       └── app.routes.ts
+│
+├── db.json
+├── angular.json
+├── package.json
+├── package-lock.json
+└── README.md
+```
+
+# Quick Revision
+
+| Concept | Purpose |
+|---|---|
+| HTTP Interceptor | Intercepts HTTP requests and responses |
+| `HttpInterceptorFn` | Defines a functional interceptor |
+| `HttpRequest` | Represents an outgoing HTTP request |
+| `next()` | Passes the request to the next handler |
+| `clone()` | Creates a modified HTTP request |
+| `withInterceptors()` | Registers functional interceptors |
+| `tap()` | Performs side effects such as logging |
+| `catchError()` | Handles HTTP errors |
+| Header interceptor | Adds common headers |
+| Auth interceptor | Adds authentication tokens |
+| Error interceptor | Centralizes HTTP error handling |
 
 # Key Takeaways
 
-- Asynchronous programming allows an application to handle results that become available later.
-- HTTP requests are a common asynchronous operation.
-- Common approaches include callbacks, Promises, and `async/await`.
-- RxJS is used extensively by Angular for asynchronous and event-based programming.
-- Observable is the core RxJS concept.
-- An Observable can emit multiple values over time.
-- `subscribe()` receives Observable values.
-- A Subscription represents an active Observable execution.
-- RxJS operators process and transform Observable values.
-- `map()` transforms values.
-- `filter()` filters values.
-- `switchMap()` switches to the latest Observable.
-- `catchError()` handles errors.
-- `retry()` retries failed operations.
-- `debounceTime()` is useful for search input.
-- Angular `HttpClient` returns Observables.
-- The `async` pipe can consume an Observable directly in an Angular template.
-- RxJS provides the reactive programming foundation commonly used with Angular.
+- HTTP interceptors provide a centralized way to process HTTP requests and responses.
+- Angular supports functional HTTP interceptors.
+- `HttpInterceptorFn` is used to define a functional interceptor.
+- `next(req)` continues the HTTP request chain.
+- HTTP requests are immutable, so use `req.clone()` when modifying a request.
+- Interceptors can add headers to outgoing requests.
+- Interceptors can log requests and responses.
+- Interceptors can provide centralized HTTP error handling.
+- Authentication tokens can be added through an interceptor.
+- Multiple interceptors can be registered together.
+- API-specific operations should remain in services.
+- Common HTTP behavior should be handled through interceptors.
+- Interceptors are especially useful when the same HTTP behavior applies to many API requests.
