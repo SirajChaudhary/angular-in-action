@@ -1,0 +1,156 @@
+<h1>REST API call with HttpClient</h1>
+
+<h2>Get Customer</h2>
+
+<button (click)="loadCustomers()">
+  Get All Customers
+</button>
+
+@if (customers.length > 0) {
+
+  <h3>Customer List</h3>
+
+  <table border="1">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>City</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      @for (customer of customers; track customer.id) {
+        <tr>
+          <td>{{ customer.id }}</td>
+          <td>{{ customer.name }}</td>
+          <td>{{ customer.email }}</td>
+          <td>{{ customer.phone }}</td>
+          <td>{{ customer.city }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+}
+
+<h2>Get Customer by ID</h2>
+
+<input
+  type="number"
+  [(ngModel)]="customerId">
+
+<button (click)="loadCustomerById()">
+  Get Customer
+</button>
+
+@if (selectedCustomer) {
+  <p>ID: {{ selectedCustomer.id }}</p>
+  <p>Name: {{ selectedCustomer.name }}</p>
+  <p>Email: {{ selectedCustomer.email }}</p>
+  <p>Phone: {{ selectedCustomer.phone }}</p>
+  <p>City: {{ selectedCustomer.city }}</p>
+}
+
+<h2>Create Customer</h2>
+
+<input
+  type="text"
+  placeholder="Name"
+  [(ngModel)]="newCustomer.name">
+
+<input
+  type="email"
+  placeholder="Email"
+  [(ngModel)]="newCustomer.email">
+
+<input
+  type="text"
+  placeholder="Phone"
+  [(ngModel)]="newCustomer.phone">
+
+<input
+  type="text"
+  placeholder="City"
+  [(ngModel)]="newCustomer.city">
+
+<button (click)="createCustomer()">
+  Create Customer
+</button>
+
+<h2>Update Customer</h2>
+
+<input
+  type="number"
+  placeholder="ID"
+  [(ngModel)]="updateForm.id">
+
+<input
+  type="text"
+  placeholder="Name"
+  [(ngModel)]="updateForm.name">
+
+<input
+  type="email"
+  placeholder="Email"
+  [(ngModel)]="updateForm.email">
+
+<input
+  type="text"
+  placeholder="Phone"
+  [(ngModel)]="updateForm.phone">
+
+<input
+  type="text"
+  placeholder="City"
+  [(ngModel)]="updateForm.city">
+
+<button (click)="updateCustomer()">
+  Update Customer
+</button>
+
+<h2>Patch Customer</h2>
+
+<input
+  type="number"
+  placeholder="Customer ID"
+  [(ngModel)]="patchId">
+
+<input
+  type="email"
+  placeholder="New Email"
+  [(ngModel)]="patchEmail">
+
+<button (click)="patchCustomer()">
+  Update Email
+</button>
+
+<h2>Delete Customer</h2>
+
+<input
+  type="number"
+  placeholder="Customer ID"
+  [(ngModel)]="deleteId">
+
+<button (click)="deleteCustomer()">
+  Delete Customer
+</button>
+
+<h2>HEAD Request</h2>
+
+<input
+  type="number"
+  placeholder="Customer ID"
+  [(ngModel)]="customerId">
+
+<button (click)="checkCustomer()">
+  Check Customer
+</button>
+
+<h2>OPTIONS Request</h2>
+
+<button (click)="getCustomerOptions()">
+  Get API Options
+</button>

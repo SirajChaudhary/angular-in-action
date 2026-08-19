@@ -1,226 +1,659 @@
-# Lesson 12 — Forms & Form Validation
+# Lesson 13 — HttpClient & REST APIs
 
-# What are Angular Forms
+# What is Angular HttpClient
 
-Angular Forms provide a way to collect, manage, and validate user input.
+Angular `HttpClient` provides a way for Angular applications to communicate with backend services using HTTP.
 
-Forms are commonly used for:
+It is commonly used to:
 
-- Login forms.
-- Registration forms.
-- Customer forms.
-- Search forms.
-- Profile forms.
-- Data entry forms.
+- Fetch data from a backend API.
+- Send data to a backend API.
+- Update existing data.
+- Delete data.
+- Send query parameters.
+- Send HTTP headers.
+- Handle HTTP errors.
+- Work with typed API responses.
 
-Angular provides two main approaches for building forms:
+Angular provides the `HttpClient` service through:
 
-1. Template-driven forms
-2. Reactive forms
-
-# Template-driven Forms
-
-Template-driven forms are primarily defined in the HTML template.
-
-They are useful for simple forms where most of the form behavior can be expressed directly in the template.
-
-Template-driven forms use:
-
-```text
-FormsModule
+```typescript
+import { HttpClient } from '@angular/common/http';
 ```
 
-The `ngModel` directive connects form controls with component properties.
+`HttpClient` methods return RxJS `Observable`s. The HTTP request is sent when the observable is subscribed to.
 
-# Example 1 — User Registration Form
+# HTTP Methods
 
-A user registration form is a practical example of a template-driven form.
+Angular `HttpClient` supports the HTTP methods commonly used when communicating with REST APIs.
 
-It can collect:
+| HTTP Method | Purpose | Example |
+|---|---|---|
+| `GET` | Retrieve data | Get customers |
+| `POST` | Create data | Create customer |
+| `PUT` | Replace or update an existing resource | Update customer |
+| `PATCH` | Partially update an existing resource | Update customer email |
+| `DELETE` | Delete a resource | Delete customer |
+| `HEAD` | Retrieve response headers without the response body | Check resource metadata |
+| `OPTIONS` | Retrieve communication options supported by a resource | Check supported methods |
 
-- Full name.
-- Email.
-- Password.
-- Confirm password.
-- Terms and conditions.
+Angular `HttpClient` provides corresponding methods such as:
 
-Create/use **initial Angular project skeleton** and create the `registration` component.
+```typescript
+http.get()
+http.post()
+http.put()
+http.patch()
+http.delete()
+http.head()
+http.options()
+```
+
+For REST API development, `GET`, `POST`, `PUT`, `PATCH`, and `DELETE` are the methods most commonly used by application code.
+
+# Setting Up HttpClient
+
+Modern standalone Angular applications configure `HttpClient` using:
+
+```typescript
+provideHttpClient()
+```
+
+Angular recommends configuring `HttpClient` this way rather than using the older module-based approach.
+
+# Practical Example — Customer REST API
+
+For this lesson, we will build a Customer Management example.
+
+The application will demonstrate:
+
+```text
+Customer Management
+├── Get all customers
+├── Get customer by ID
+├── Create customer
+├── Update customer
+├── Partially update customer
+└── Delete customer
+```
+
+The Customer component will provide a simple UI for performing the REST API operations directly from the browser.
+
+Create/use **initial Angular project skeleton (from lesson-04)** and create the `customer` component and `customer` service.
 
 ```bash
 ng new my-angular-application
-ng g c registration
+ng g c customer
+ng g s services/customer
 ```
 
-Then implement the registration form step by step.
+Then implement HTTP communication step by step.
 
-### Step 1: Open the Registration Component
+### Step 1: Configure HttpClient
 
 Open:
 
 ```text
-src/app/registration/registration.ts
+src/app/app.config.ts
 ```
 
 Update it:
 
 ```typescript
-import { Component } from '@angular/core';
+import { ApplicationConfig } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideHttpClient()
+  ]
+};
+```
+
+`provideHttpClient()` makes `HttpClient` available for dependency injection throughout the application.
+
+### Step 2: Create the Customer Model
+
+Create:
+
+```text
+src/app/models/customer.ts
+```
+
+Add:
+
+```typescript
+export interface Customer {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  city: string;
+}
+```
+
+The interface describes the structure of customer data returned by the API.
+
+### Step 3: Create the Customer Service
+
+Open:
+
+```text
+src/app/services/customer.ts
+```
+
+Update it:
+
+```typescript
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Customer } from '../models/customer';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class CustomerService {
+
+  private http = inject(HttpClient);
+
+  private apiUrl = 'http://localhost:3000/customers';
+
+  getCustomers(): Observable<Customer[]> {
+    return this.http.get<Customer[]>(this.apiUrl);
+  }
+
+  getCustomerById(id: number): Observable<Customer> {
+    return this.http.get<Customer>(`${this.apiUrl}/${id}`);
+  }
+
+  createCustomer(customer: Omit<Customer, 'id'>): Observable<Customer> {
+    return this.http.post<Customer>(this.apiUrl, customer);
+  }
+
+  updateCustomer(customer: Customer): Observable<Customer> {
+    return this.http.put<Customer>(
+      `${this.apiUrl}/${customer.id}`,
+      customer
+    );
+  }
+
+  patchCustomer(
+    id: number,
+    changes: Partial<Customer>
+  ): Observable<Customer> {
+    return this.http.patch<Customer>(
+      `${this.apiUrl}/${id}`,
+      changes
+    );
+  }
+
+  deleteCustomer(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  checkCustomer(id: number): Observable<void> {
+    return this.http.head<void>(`${this.apiUrl}/${id}`);
+  }
+
+  getCustomerOptions(): Observable<any> {
+    return this.http.options<any>(this.apiUrl);
+  }
+}
+```
+
+The service now contains examples for:
+
+```text
+GET
+POST
+PUT
+PATCH
+DELETE
+HEAD
+OPTIONS
+```
+
+Angular recommends isolating data-access logic in reusable injectable services rather than placing HTTP calls directly inside components.
+
+### Step 4: Understand the GET Request
+
+The service uses:
+
+```typescript
+return this.http.get<Customer[]>(this.apiUrl);
+```
+
+This sends a `GET` request to:
+
+```text
+http://localhost:3000/customers
+```
+
+The generic type:
+
+```typescript
+<Customer[]>
+```
+
+indicates that the expected response is an array of `Customer` objects.
+
+Angular supports typed response values through generic type parameters. These types describe what the application expects; `HttpClient` does not runtime-validate that the server response actually matches the TypeScript type.
+
+### Step 5: Create Sample API Data
+
+For this lesson, we can use JSON Server as a simple local REST API.
+
+Install JSON Server:
+
+```bash
+npm install -g json-server
+```
+
+Create:
+
+```text
+db.json
+```
+
+at the project root:
+
+```json
+{
+  "customers": [
+    {
+      "id": 1,
+      "name": "Siraj Chaudhary",
+      "email": "siraj@example.com",
+      "phone": "9876543210",
+      "city": "Hyderabad"
+    },
+    {
+      "id": 2,
+      "name": "Ahmed Khan",
+      "email": "ahmed@example.com",
+      "phone": "9876543211",
+      "city": "Pune"
+    },
+    {
+      "id": 3,
+      "name": "John Smith",
+      "email": "john@example.com",
+      "phone": "9876543212",
+      "city": "Bengaluru"
+    },
+    {
+      "id": 4,
+      "name": "Priya Sharma",
+      "email": "priya@example.com",
+      "phone": "9876543213",
+      "city": "Mumbai"
+    },
+    {
+      "id": 5,
+      "name": "David Wilson",
+      "email": "david@example.com",
+      "phone": "9876543214",
+      "city": "Chennai"
+    }
+  ]
+}
+```
+
+Start the API:
+
+```bash
+json-server --watch db.json
+```
+
+The API will be available at:
+
+```text
+http://localhost:3000/customers
+```
+
+<img width="3840" height="1308" alt="image" src="https://github.com/user-attachments/assets/1bd5d50a-d1c6-4140-a5f2-ba6ed9c2cc2a" />
+
+### Step 6: Open the Customer Component
+
+Open:
+
+```text
+src/app/customer/customer.ts
+```
+
+Update it:
+
+```typescript
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { CustomerService } from '../services/customer';
+import { Customer as CustomerModel } from '../models/customer';
 
 @Component({
-  selector: 'app-registration',
+  selector: 'app-customer',
   imports: [FormsModule],
-  templateUrl: './registration.html',
-  styleUrl: './registration.css'
+  templateUrl: './customer.html',
+  styleUrl: './customer.css'
 })
-export class Registration {
-  fullName = '';
-  email = '';
-  password = '';
-  confirmPassword = '';
-  acceptTerms = false;
+export class Customer {
 
-  register(): void {
-    console.log('Registration:', {
-      fullName: this.fullName,
-      email: this.email,
-      password: this.password,
-      confirmPassword: this.confirmPassword,
-      acceptTerms: this.acceptTerms
+  private customerService = inject(CustomerService);
+
+  customers: CustomerModel[] = [];
+
+  selectedCustomer: CustomerModel | null = null;
+
+  customerId = 1;
+
+  newCustomer = {
+    name: '',
+    email: '',
+    phone: '',
+    city: ''
+  };
+
+  updateForm: CustomerModel = {
+    id: 1,
+    name: '',
+    email: '',
+    phone: '',
+    city: ''
+  };
+
+  patchId = 1;
+  patchEmail = '';
+
+  deleteId = 1;
+
+  loadCustomers(): void {
+    this.customerService.getCustomers().subscribe({
+      next: (customers) => {
+        this.customers = customers;
+      },
+      error: (error) => {
+        console.error('Failed to load customers:', error);
+      }
+    });
+  }
+
+  loadCustomerById(): void {
+    this.customerService.getCustomerById(this.customerId).subscribe({
+      next: (customer) => {
+        this.selectedCustomer = customer;
+      },
+      error: (error) => {
+        console.error('Failed to load customer:', error);
+      }
+    });
+  }
+
+  createCustomer(): void {
+    this.customerService.createCustomer(this.newCustomer).subscribe({
+      next: (customer) => {
+        console.log('Created customer:', customer);
+        this.newCustomer = {
+          name: '',
+          email: '',
+          phone: '',
+          city: ''
+        };
+        this.loadCustomers();
+      },
+      error: (error) => {
+        console.error('Failed to create customer:', error);
+      }
+    });
+  }
+
+  updateCustomer(): void {
+    this.customerService.updateCustomer(this.updateForm).subscribe({
+      next: (customer) => {
+        console.log('Updated customer:', customer);
+        this.loadCustomers();
+      },
+      error: (error) => {
+        console.error('Failed to update customer:', error);
+      }
+    });
+  }
+
+  patchCustomer(): void {
+    this.customerService.patchCustomer(
+      this.patchId,
+      { email: this.patchEmail }
+    ).subscribe({
+      next: (customer) => {
+        console.log('Patched customer:', customer);
+        this.loadCustomers();
+      },
+      error: (error) => {
+        console.error('Failed to patch customer:', error);
+      }
+    });
+  }
+
+  deleteCustomer(): void {
+    this.customerService.deleteCustomer(this.deleteId).subscribe({
+      next: () => {
+        console.log('Customer deleted successfully.');
+        this.loadCustomers();
+      },
+      error: (error) => {
+        console.error('Failed to delete customer:', error);
+      }
+    });
+  }
+
+  checkCustomer(): void {
+    this.customerService.checkCustomer(this.customerId).subscribe({
+      next: () => {
+        console.log('Customer resource exists.');
+      },
+      error: (error) => {
+        console.error('HEAD request failed:', error);
+      }
+    });
+  }
+
+  getCustomerOptions(): void {
+    this.customerService.getCustomerOptions().subscribe({
+      next: (response) => {
+        console.log('OPTIONS response:', response);
+      },
+      error: (error) => {
+        console.error('OPTIONS request failed:', error);
+      }
     });
   }
 }
 ```
 
-### Step 2: Create the Registration Form
+The component contains the UI state and calls the corresponding service method for each API operation. The HTTP implementation remains inside `CustomerService`.
+
+### Step 7: Display Customers and Perform REST API Operations
 
 Open:
 
 ```text
-src/app/registration/registration.html
+src/app/customer/customer.html
 ```
 
-Add:
+Replace the contents with:
 
 ```html
-<h2>User Registration</h2>
+<h1>REST API call with HttpClient</h1>
 
-<form #registrationForm="ngForm" (ngSubmit)="register()">
+<h2>Get Customer</h2>
 
-  <div>
-    <label for="fullName">Full Name:</label>
+<button (click)="loadCustomers()">
+  Get All Customers
+</button>
 
-    <input
-      id="fullName"
-      name="fullName"
-      type="text"
-      [(ngModel)]="fullName"
-      #fullNameControl="ngModel"
-      required
-      minlength="3">
+@if (customers.length > 0) {
 
-    @if (fullNameControl.touched &&
-         fullNameControl.hasError('required')) {
-      <p>Full name is required.</p>
-    }
+  <h3>Customer List</h3>
 
-    @if (fullNameControl.touched &&
-         fullNameControl.hasError('minlength')) {
-      <p>Full name must contain at least 3 characters.</p>
-    }
-  </div>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>City</th>
+      </tr>
+    </thead>
 
-  <div>
-    <label for="email">Email:</label>
+    <tbody>
+      @for (customer of customers; track customer.id) {
+        <tr>
+          <td>{{ customer.id }}</td>
+          <td>{{ customer.name }}</td>
+          <td>{{ customer.email }}</td>
+          <td>{{ customer.phone }}</td>
+          <td>{{ customer.city }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
 
-    <input
-      id="email"
-      name="email"
-      type="email"
-      [(ngModel)]="email"
-      #emailControl="ngModel"
-      required
-      email>
+}
 
-    @if (emailControl.touched &&
-         emailControl.hasError('required')) {
-      <p>Email is required.</p>
-    }
+<h2>Get Customer by ID</h2>
 
-    @if (emailControl.touched &&
-         emailControl.hasError('email')) {
-      <p>Enter a valid email address.</p>
-    }
-  </div>
+<input
+  type="number"
+  [(ngModel)]="customerId">
 
-  <div>
-    <label for="password">Password:</label>
+<button (click)="loadCustomerById()">
+  Get Customer
+</button>
 
-    <input
-      id="password"
-      name="password"
-      type="password"
-      [(ngModel)]="password"
-      #passwordControl="ngModel"
-      required
-      minlength="8">
+@if (selectedCustomer) {
+  <p>ID: {{ selectedCustomer.id }}</p>
+  <p>Name: {{ selectedCustomer.name }}</p>
+  <p>Email: {{ selectedCustomer.email }}</p>
+  <p>Phone: {{ selectedCustomer.phone }}</p>
+  <p>City: {{ selectedCustomer.city }}</p>
+}
 
-    @if (passwordControl.touched &&
-         passwordControl.hasError('required')) {
-      <p>Password is required.</p>
-    }
+<h2>Create Customer</h2>
 
-    @if (passwordControl.touched &&
-         passwordControl.hasError('minlength')) {
-      <p>Password must contain at least 8 characters.</p>
-    }
-  </div>
+<input
+  type="text"
+  placeholder="Name"
+  [(ngModel)]="newCustomer.name">
 
-  <div>
-    <label for="confirmPassword">Confirm Password:</label>
+<input
+  type="email"
+  placeholder="Email"
+  [(ngModel)]="newCustomer.email">
 
-    <input
-      id="confirmPassword"
-      name="confirmPassword"
-      type="password"
-      [(ngModel)]="confirmPassword"
-      #confirmPasswordControl="ngModel"
-      required>
+<input
+  type="text"
+  placeholder="Phone"
+  [(ngModel)]="newCustomer.phone">
 
-    @if (confirmPasswordControl.touched &&
-         confirmPasswordControl.hasError('required')) {
-      <p>Please confirm your password.</p>
-    }
-  </div>
+<input
+  type="text"
+  placeholder="City"
+  [(ngModel)]="newCustomer.city">
 
-  <div>
-    <label class="checkbox-label">
-      <input
-        type="checkbox"
-        name="acceptTerms"
-        [(ngModel)]="acceptTerms"
-        #termsControl="ngModel"
-        required>
+<button (click)="createCustomer()">
+  Create Customer
+</button>
 
-      I accept the terms and conditions.
-    </label>
+<h2>Update Customer</h2>
 
-    @if (termsControl.touched &&
-         termsControl.invalid) {
-      <p>You must accept the terms and conditions.</p>
-    }
-  </div>
+<input
+  type="number"
+  placeholder="ID"
+  [(ngModel)]="updateForm.id">
 
-  <button
-    type="submit"
-    [disabled]="registrationForm.invalid">
-    Register
-  </button>
+<input
+  type="text"
+  placeholder="Name"
+  [(ngModel)]="updateForm.name">
 
-</form>
+<input
+  type="email"
+  placeholder="Email"
+  [(ngModel)]="updateForm.email">
+
+<input
+  type="text"
+  placeholder="Phone"
+  [(ngModel)]="updateForm.phone">
+
+<input
+  type="text"
+  placeholder="City"
+  [(ngModel)]="updateForm.city">
+
+<button (click)="updateCustomer()">
+  Update Customer
+</button>
+
+<h2>Patch Customer</h2>
+
+<input
+  type="number"
+  placeholder="Customer ID"
+  [(ngModel)]="patchId">
+
+<input
+  type="email"
+  placeholder="New Email"
+  [(ngModel)]="patchEmail">
+
+<button (click)="patchCustomer()">
+  Update Email
+</button>
+
+<h2>Delete Customer</h2>
+
+<input
+  type="number"
+  placeholder="Customer ID"
+  [(ngModel)]="deleteId">
+
+<button (click)="deleteCustomer()">
+  Delete Customer
+</button>
+
+<h2>HEAD Request</h2>
+
+<input
+  type="number"
+  placeholder="Customer ID"
+  [(ngModel)]="customerId">
+
+<button (click)="checkCustomer()">
+  Check Customer
+</button>
+
+<h2>OPTIONS Request</h2>
+
+<button (click)="getCustomerOptions()">
+  Get API Options
+</button>
 ```
 
-### Step 3: Add the Registration Component to the Root Component
+This page demonstrates:
+
+```text
+GET       → Get all customers
+GET       → Get customer by ID
+POST      → Create customer
+PUT       → Update customer
+PATCH     → Partially update customer
+DELETE    → Delete customer
+HEAD      → Check customer resource
+OPTIONS   → Get supported API options
+```
+
+### Step 8: Add the Customer Component to the Root Component
 
 Open:
 
@@ -232,11 +665,11 @@ Update it:
 
 ```typescript
 import { Component, signal } from '@angular/core';
-import { Registration } from './registration/registration';
+import { Customer } from './customer/customer';
 
 @Component({
   selector: 'app-root',
-  imports: [Registration],
+  imports: [Customer],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -245,7 +678,7 @@ export class App {
 }
 ```
 
-### Step 4: Render the Registration Form
+### Step 9: Render the Customer Component
 
 Open:
 
@@ -256,71 +689,18 @@ src/app/app.html
 Add:
 
 ```html
-<app-registration></app-registration>
+<app-customer></app-customer>
 ```
 
-### Step 5: Add CSS to the Registration Form
+### Step 10: Run the Application
 
-Open:
+Start the API:
 
-```text
-src/app/registration/registration.css
+```bash
+json-server --watch db.json
 ```
 
-Add:
-
-```css
-form {
-  width: 400px;
-}
-
-form > div {
-  margin-bottom: 16px;
-}
-
-label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 500;
-}
-
-input[type="text"],
-input[type="email"],
-input[type="password"] {
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-}
-
-input[type="checkbox"] {
-  margin-right: 8px;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  font-weight: normal;
-}
-
-p {
-  margin: 5px 0 0;
-}
-
-button {
-  padding: 8px 16px;
-  cursor: pointer;
-}
-
-button:disabled {
-  cursor: not-allowed;
-}
-```
-
-The CSS improves the alignment and spacing of the registration form while keeping the styling simple.
-
-### Step 6: Run the Registration Form
-
-From the project root:
+In another terminal, start Angular:
 
 ```bash
 ng serve
@@ -332,523 +712,233 @@ Open:
 http://localhost:4200
 ```
 
-Try submitting the form with invalid values.
-
-The validation messages should appear when the controls are touched.
-
-The Register button remains disabled while the form is invalid.
+The page now provides a basic UI for performing the REST API operations.
 <br /><br />
-<img width="3840" height="1350" alt="image" src="https://github.com/user-attachments/assets/2d39cce1-293a-4d19-a03a-8749590dee85" />
+<img width="3840" height="1840" alt="image" src="https://github.com/user-attachments/assets/e1681abc-894e-484e-abec-c449a618c40b" />
 
-# Reactive Forms
+# REST API Operations
 
-Reactive forms define the form model primarily in TypeScript.
+The customer service exposes the following REST API operations:
 
-They are particularly useful when forms contain:
+| Operation | HTTP Method | Endpoint | Purpose |
+|---|---|---|---|
+| Get all customers | `GET` | `/customers` | Retrieve all customers |
+| Get customer | `GET` | `/customers/{id}` | Retrieve one customer |
+| Create customer | `POST` | `/customers` | Create a new customer |
+| Update customer | `PUT` | `/customers/{id}` | Replace an existing customer |
+| Partially update customer | `PATCH` | `/customers/{id}` | Update selected fields |
+| Delete customer | `DELETE` | `/customers/{id}` | Delete a customer |
+| Check customer | `HEAD` | `/customers/{id}` | Retrieve headers without a response body |
+| Get API options | `OPTIONS` | `/customers` | Retrieve supported communication options |
 
-- Multiple fields.
-- Complex validation.
-- Conditional validation.
-- Dynamic fields.
-- Programmatic updates.
-- More complex form state.
+# Query Parameters
 
-Reactive forms use:
+HTTP requests can include query parameters.
 
-```text
-ReactiveFormsModule
-```
+Angular provides `HttpParams` for this purpose.
 
-and commonly use:
-
-```text
-FormControl
-FormGroup
-Validators
-```
-
-# Example 2 — Customer Profile Form
-
-A customer profile form is a practical example of a reactive form.
-
-It can collect:
-
-- Customer name.
-- Email.
-- Phone.
-- Date of birth.
-- Address.
-- City.
-- State.
-- PIN code.
-
-Create/use **initial Angular project skeleton** and create the `customer-profile` component.
-
-```bash
-ng new my-angular-application
-ng g c customer-profile
-```
-
-Then implement the customer profile form step by step.
-
-### Step 1: Open the Customer Profile Component
-
-Open:
-
-```text
-src/app/customer-profile/customer-profile.ts
-```
-
-Update it:
+Example:
 
 ```typescript
-import { Component } from '@angular/core';
-import {
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators
-} from '@angular/forms';
+import { HttpParams } from '@angular/common/http';
+```
 
-@Component({
-  selector: 'app-customer-profile',
-  imports: [ReactiveFormsModule],
-  templateUrl: './customer-profile.html',
-  styleUrl: './customer-profile.css'
-})
-export class CustomerProfile {
+Then:
 
-  customerForm = new FormGroup({
-    fullName: new FormControl('', [
-      Validators.required,
-      Validators.minLength(3)
-    ]),
+```typescript
+searchCustomers(name: string): Observable<Customer[]> {
 
-    email: new FormControl('', [
-      Validators.required,
-      Validators.email
-    ]),
+  const params = new HttpParams()
+    .set('name', name);
 
-    phone: new FormControl('', [
-      Validators.required,
-      Validators.pattern(/^[0-9]{10}$/)
-    ]),
+  return this.http.get<Customer[]>(
+    this.apiUrl,
+    { params }
+  );
+}
+```
 
-    dateOfBirth: new FormControl('', [
-      Validators.required
-    ]),
+This can produce a request such as:
 
-    address: new FormControl('', [
-      Validators.required,
-      Validators.minLength(10)
-    ]),
+```text
+GET /customers?name=Siraj
+```
 
-    city: new FormControl('', [
-      Validators.required
-    ]),
+# HTTP Headers
 
-    state: new FormControl('', [
-      Validators.required
-    ]),
+HTTP headers can be supplied using `HttpHeaders`.
 
-    pinCode: new FormControl('', [
-      Validators.required,
-      Validators.pattern(/^[0-9]{6}$/)
-    ])
-  });
+Example:
 
-  saveProfile(): void {
-    if (this.customerForm.valid) {
-      console.log('Customer Profile:', this.customerForm.value);
-    }
+```typescript
+import { HttpHeaders } from '@angular/common/http';
+```
+
+Then:
+
+```typescript
+const headers = new HttpHeaders({
+  'Content-Type': 'application/json'
+});
+
+return this.http.get<Customer[]>(
+  this.apiUrl,
+  { headers }
+);
+```
+
+In real applications, authentication headers are often handled centrally using an HTTP interceptor rather than manually adding them to every request.
+
+# HTTP Error Handling
+
+HTTP requests can fail because of:
+
+- Network errors.
+- Backend errors.
+- Timeout errors.
+- Invalid requests.
+- Server errors.
+
+Angular reports HTTP failures through `HttpErrorResponse`.
+
+Example:
+
+```typescript
+this.customerService.getCustomers().subscribe({
+  next: (customers) => {
+    this.customers = customers;
+  },
+  error: (error) => {
+    console.error('HTTP Status:', error.status);
+    console.error('HTTP Error:', error);
   }
-}
+});
 ```
 
-### Step 2: Create the Customer Profile Form
-
-Open:
+For reusable error handling, RxJS provides operators such as:
 
 ```text
-src/app/customer-profile/customer-profile.html
+catchError()
 ```
 
-Add:
-
-```html
-<h2>Customer Profile</h2>
-
-<form [formGroup]="customerForm" (ngSubmit)="saveProfile()">
-
-  <div>
-    <label for="fullName">Full Name:</label>
-
-    <input
-      id="fullName"
-      type="text"
-      formControlName="fullName">
-
-    @if (customerForm.controls.fullName.touched &&
-         customerForm.controls.fullName.hasError('required')) {
-      <p>Full name is required.</p>
-    }
-
-    @if (customerForm.controls.fullName.touched &&
-         customerForm.controls.fullName.hasError('minlength')) {
-      <p>Full name must contain at least 3 characters.</p>
-    }
-  </div>
-
-  <div>
-    <label for="email">Email:</label>
-
-    <input
-      id="email"
-      type="email"
-      formControlName="email">
-
-    @if (customerForm.controls.email.touched &&
-         customerForm.controls.email.hasError('required')) {
-      <p>Email is required.</p>
-    }
-
-    @if (customerForm.controls.email.touched &&
-         customerForm.controls.email.hasError('email')) {
-      <p>Enter a valid email address.</p>
-    }
-  </div>
-
-  <div>
-    <label for="phone">Phone:</label>
-
-    <input
-      id="phone"
-      type="tel"
-      formControlName="phone">
-
-    @if (customerForm.controls.phone.touched &&
-         customerForm.controls.phone.hasError('required')) {
-      <p>Phone number is required.</p>
-    }
-
-    @if (customerForm.controls.phone.touched &&
-         customerForm.controls.phone.hasError('pattern')) {
-      <p>Enter a valid 10-digit phone number.</p>
-    }
-  </div>
-
-  <div>
-    <label for="dateOfBirth">Date of Birth:</label>
-
-    <input
-      id="dateOfBirth"
-      type="date"
-      formControlName="dateOfBirth">
-
-    @if (customerForm.controls.dateOfBirth.touched &&
-         customerForm.controls.dateOfBirth.hasError('required')) {
-      <p>Date of birth is required.</p>
-    }
-  </div>
-
-  <div>
-    <label for="address">Address:</label>
-
-    <textarea
-      id="address"
-      formControlName="address">
-    </textarea>
-
-    @if (customerForm.controls.address.touched &&
-         customerForm.controls.address.hasError('required')) {
-      <p>Address is required.</p>
-    }
-
-    @if (customerForm.controls.address.touched &&
-         customerForm.controls.address.hasError('minlength')) {
-      <p>Address must contain at least 10 characters.</p>
-    }
-  </div>
-
-  <div>
-    <label for="city">City:</label>
-
-    <input
-      id="city"
-      type="text"
-      formControlName="city">
-
-    @if (customerForm.controls.city.touched &&
-         customerForm.controls.city.hasError('required')) {
-      <p>City is required.</p>
-    }
-  </div>
-
-  <div>
-    <label for="state">State:</label>
-
-    <input
-      id="state"
-      type="text"
-      formControlName="state">
-
-    @if (customerForm.controls.state.touched &&
-         customerForm.controls.state.hasError('required')) {
-      <p>State is required.</p>
-    }
-  </div>
-
-  <div>
-    <label for="pinCode">PIN Code:</label>
-
-    <input
-      id="pinCode"
-      type="text"
-      formControlName="pinCode">
-
-    @if (customerForm.controls.pinCode.touched &&
-         customerForm.controls.pinCode.hasError('required')) {
-      <p>PIN code is required.</p>
-    }
-
-    @if (customerForm.controls.pinCode.touched &&
-         customerForm.controls.pinCode.hasError('pattern')) {
-      <p>Enter a valid 6-digit PIN code.</p>
-    }
-  </div>
-
-  <button
-    type="submit"
-    [disabled]="customerForm.invalid">
-    Save Profile
-  </button>
-
-</form>
-```
-
-### Step 3: Add the Customer Profile Component to the Root Component
-
-Open:
+and:
 
 ```text
-src/app/app.ts
+retry()
 ```
 
-Update it:
+# Loading State
+
+A UI should normally indicate when an HTTP request is in progress.
+
+For example, in the component:
 
 ```typescript
-import { Component, signal } from '@angular/core';
-import { CustomerProfile } from './customer-profile/customer-profile';
+isLoading = false;
 
-@Component({
-  selector: 'app-root',
-  imports: [CustomerProfile],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
-})
-export class App {
-  protected readonly title = signal('my-angular-application');
+loadCustomers(): void {
+
+  this.isLoading = true;
+
+  this.customerService.getCustomers().subscribe({
+    next: (customers) => {
+      this.customers = customers;
+      this.isLoading = false;
+    },
+    error: (error) => {
+      console.error('Failed to load customers:', error);
+      this.isLoading = false;
+    }
+  });
 }
 ```
 
-### Step 4: Render the Customer Profile Form
-
-Open:
-
-```text
-src/app/app.html
-```
-
-Add:
+Then in the template:
 
 ```html
-<app-customer-profile></app-customer-profile>
-```
-
-### Step 5: Add CSS to the Customer Profile Form
-
-Open:
-
-```text
-src/app/customer-profile/customer-profile.css
-```
-
-Add:
-
-```css
-form {
-  width: 400px;
-}
-
-form > div {
-  margin-bottom: 16px;
-}
-
-label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 500;
-}
-
-input[type="text"],
-input[type="email"],
-input[type="tel"],
-input[type="date"],
-textarea {
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-}
-
-textarea {
-  min-height: 80px;
-  resize: vertical;
-}
-
-p {
-  margin: 5px 0 0;
-}
-
-button {
-  padding: 8px 16px;
-  cursor: pointer;
-}
-
-button:disabled {
-  cursor: not-allowed;
+@if (isLoading) {
+  <p>Loading customers...</p>
 }
 ```
 
-The CSS provides consistent spacing, input widths, and alignment for the customer profile form.
+# Observables and HttpClient
 
-### Step 6: Run the Customer Profile Form
-
-From the project root:
-
-```bash
-ng serve
-```
-
-Open:
-
-```text
-http://localhost:4200
-```
-
-Enter the customer information and click:
-
-```text
-Save Profile
-```
-
-The form values will be available through:
-
-```typescript
-this.customerForm.value
-```
-
-<img width="3840" height="1988" alt="image" src="https://github.com/user-attachments/assets/03997030-9d18-4ce5-bf93-d2362791f520" />
-
-# Form State
-
-Angular tracks the state of forms and controls.
-
-Important states include:
-
-```text
-valid
-invalid
-touched
-untouched
-dirty
-pristine
-```
+Each `HttpClient` request returns an RxJS `Observable`.
 
 For example:
 
-```text
-customerForm.valid
+```typescript
+this.http.get<Customer[]>(this.apiUrl)
 ```
 
-checks whether the entire reactive form is valid.
-
-For a template-driven form:
+returns:
 
 ```text
-customerForm.invalid
+Observable<Customer[]>
 ```
 
-checks whether the form is invalid.
+The request is sent when the observable is subscribed to:
 
-# touched and untouched
+```typescript
+this.customerService.getCustomers().subscribe({
+  next: (customers) => {
+    console.log(customers);
+  }
+});
+```
 
-A control is `untouched` when the user has not interacted with it.
+Angular's `HttpClient` observables are cold, meaning a request is not dispatched until subscription occurs. Each subscription can trigger a new backend request.
 
-After the user interacts with the control, it becomes `touched`.
+# Typed HTTP Responses
+
+Angular supports generic types for HTTP responses.
 
 Example:
 
-```text
-customerForm.controls.name.touched
+```typescript
+this.http.get<Customer[]>(this.apiUrl);
 ```
 
-This is useful when displaying validation messages only after the user interacts with the field.
-
-# dirty and pristine
-
-A control is `pristine` when its value has not been changed.
-
-It becomes `dirty` when the user changes its value.
-
-Example:
+The expected response type is:
 
 ```text
-customerForm.controls.name.dirty
+Customer[]
 ```
 
-The opposite is:
+For a single customer:
+
+```typescript
+this.http.get<Customer>(
+  `${this.apiUrl}/${id}`
+);
+```
+
+The expected response type is:
 
 ```text
-customerForm.controls.name.pristine
+Customer
 ```
 
-# Built-in Validators
+This provides compile-time type information while working with API data.
 
-Common Angular validators include:
+Remember that the generic type does not validate the actual server response at runtime.
 
-| Validator | Purpose | Example |
-|---|---|---|
-| `required` | Field must contain a value | `Validators.required` |
-| `minLength` | Minimum number of characters | `Validators.minLength(3)` |
-| `maxLength` | Maximum number of characters | `Validators.maxLength(50)` |
-| `email` | Valid email format | `Validators.email` |
-| `min` | Minimum numeric value | `Validators.min(18)` |
-| `max` | Maximum numeric value | `Validators.max(100)` |
-| `pattern` | Value must match a pattern | `Validators.pattern(...)` |
+# HTTP Interceptors
 
-# Form vs FormControl vs FormGroup
+Interceptors allow common HTTP behavior to be handled centrally.
 
-| Concept | Purpose | Example |
-|---|---|---|
-| Form | Collects user input | `<form>` |
-| FormControl | Represents one field | `new FormControl()` |
-| FormGroup | Groups controls | `new FormGroup()` |
-| Validator | Validates input | `Validators.required` |
-| FormsModule | Enables template-driven forms | `FormsModule` |
-| ReactiveFormsModule | Enables reactive forms | `ReactiveFormsModule` |
+They can be used for:
 
-# Template-driven vs Reactive Forms
+- Authentication.
+- Logging.
+- Adding headers.
+- Retry logic.
+- Caching.
+- Error handling.
 
-| Template-driven Forms | Reactive Forms |
-|---|---|
-| Uses `FormsModule` | Uses `ReactiveFormsModule` |
-| Uses `ngModel` | Uses `FormControl` and `FormGroup` |
-| Form model is created mainly by the template | Form model is created explicitly in TypeScript |
-| Validation is defined mainly in the template | Validation is defined mainly in TypeScript |
-| Simple forms | Complex forms |
-| Less explicit | More explicit |
-| Easy to get started | More control and scalability |
-| Example: User Registration | Example: Customer Profile |
+Angular currently recommends functional interceptors because they provide more predictable behavior, particularly in complex applications.
+
+A later lesson can cover HTTP interceptors in greater detail.
 
 # Practical Project Structure
 
@@ -860,17 +950,18 @@ my-angular-application/
 │
 ├── src/
 │   ├── app/
-│   │   ├── registration/
-│   │   │   ├── registration.ts
-│   │   │   ├── registration.html
-│   │   │   ├── registration.css
-│   │   │   └── registration.spec.ts
+│   │   ├── customer/
+│   │   │   ├── customer.ts
+│   │   │   ├── customer.html
+│   │   │   ├── customer.css
+│   │   │   └── customer.spec.ts
 │   │   │
-│   │   ├── customer-profile/
-│   │   │   ├── customer-profile.ts
-│   │   │   ├── customer-profile.html
-│   │   │   ├── customer-profile.css
-│   │   │   └── customer-profile.spec.ts
+│   │   ├── models/
+│   │   │   └── customer.ts
+│   │   │
+│   │   ├── services/
+│   │   │   ├── customer.service.ts
+│   │   │   └── customer.service.spec.ts
 │   │   │
 │   │   ├── app.ts
 │   │   ├── app.html
@@ -882,6 +973,7 @@ my-angular-application/
 │   ├── main.ts
 │   └── styles.css
 │
+├── db.json
 ├── angular.json
 ├── package.json
 ├── package-lock.json
@@ -897,33 +989,33 @@ my-angular-application/
 
 | Concept | Purpose | Example |
 |---|---|---|
-| Template-driven form | Form defined mainly in template | `[(ngModel)]` |
-| Reactive form | Form defined mainly in component | `FormGroup` |
-| `FormControl` | Represents one form field | `new FormControl()` |
-| `FormGroup` | Groups form controls | `new FormGroup()` |
-| `Validators` | Provides validation rules | `Validators.required` |
-| `valid` | Form/control passes validation | `form.valid` |
-| `invalid` | Form/control fails validation | `form.invalid` |
-| `touched` | User interacted with control | `control.touched` |
-| `dirty` | User changed the value | `control.dirty` |
-| `ngModel` | Template-driven binding | `[(ngModel)]="name"` |
-| `formControlName` | Connects reactive control to template | `formControlName="name"` |
-| `ngSubmit` | Handles form submission | `(ngSubmit)="submit()"` |
+| `HttpClient` | Communicates with backend APIs | `HttpClient` |
+| `provideHttpClient()` | Configures HttpClient | `provideHttpClient()` |
+| `GET` | Retrieve data | `http.get()` |
+| `POST` | Create data | `http.post()` |
+| `PUT` | Update data | `http.put()` |
+| `DELETE` | Delete data | `http.delete()` |
+| `Observable` | Represents asynchronous HTTP result | `Observable<Customer[]>` |
+| `HttpParams` | Sends query parameters | `new HttpParams()` |
+| `HttpHeaders` | Sends HTTP headers | `new HttpHeaders()` |
+| `HttpErrorResponse` | Represents HTTP errors | `HttpErrorResponse` |
+| Generic type | Describes expected response | `get<Customer[]>()` |
+| Service | Encapsulates API logic | `CustomerService` |
+| Interceptor | Handles common HTTP behavior | `withInterceptors()` |
 
 # Key Takeaways
 
-- Angular provides template-driven and reactive forms.
-- Template-driven forms use `FormsModule` and `ngModel`.
-- Reactive forms use `ReactiveFormsModule`, `FormControl`, and `FormGroup`.
-- Template-driven forms are useful for simpler forms such as user registration.
-- Reactive forms provide more explicit control for complex forms such as customer profiles.
-- `FormControl` represents an individual form field.
-- `FormGroup` groups multiple form controls.
-- Angular provides built-in validators through `Validators`.
-- `valid` and `invalid` indicate validation state.
-- `touched` and `dirty` help determine user interaction.
-- `ngSubmit` handles form submission.
-- Modern Angular control flow such as `@if` can be used to display validation messages.
-- CSS can be used to improve form alignment and readability without changing the Angular form logic.
-- Template-driven forms are easier to get started with.
-- Reactive forms provide greater control and scalability for complex forms.
+- Angular applications commonly communicate with backend services using `HttpClient`.
+- Modern standalone Angular applications configure HTTP using `provideHttpClient()`.
+- `HttpClient` supports common HTTP methods such as `GET`, `POST`, `PUT`, and `DELETE`.
+- HTTP methods return RxJS `Observable`s.
+- HTTP requests are sent when the observable is subscribed to.
+- API communication should generally be encapsulated inside reusable services.
+- Generic types can describe expected API response structures.
+- `HttpParams` can be used for query parameters.
+- `HttpHeaders` can be used to send HTTP headers.
+- `HttpErrorResponse` provides information about failed HTTP requests.
+- Loading states can improve the user experience during API calls.
+- RxJS operators such as `catchError` and `retry` can help handle HTTP failures.
+- HTTP interceptors can centralize common concerns such as authentication and logging.
+- Angular's `HttpClient` does not runtime-validate the response against the TypeScript generic type.
