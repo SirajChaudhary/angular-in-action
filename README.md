@@ -1,320 +1,93 @@
-# Lesson 13 — HttpClient & REST APIs
+# Lesson 14 — Decorators
 
-# What is Angular HttpClient
+# What Are Decorators
 
-Angular `HttpClient` provides a way for Angular applications to communicate with backend services using HTTP.
+Decorators are special TypeScript syntax (using the `@` symbol) that add metadata to classes, properties, and methods.
 
-It is commonly used to:
+Angular uses decorators to tell the framework how a class or class member should be treated.
 
-- Fetch data from a backend API.
-- Send data to a backend API.
-- Update existing data.
-- Delete data.
-- Send query parameters.
-- Send HTTP headers.
-- Handle HTTP errors.
-- Work with typed API responses.
+Common Angular decorators:
 
-Angular provides the `HttpClient` service through:
-
-```typescript
-import { HttpClient } from '@angular/common/http';
-```
-
-`HttpClient` methods return RxJS `Observable`s. The HTTP request is sent when the observable is subscribed to.
-
-# HTTP Methods
-
-Angular `HttpClient` supports the HTTP methods commonly used when communicating with REST APIs.
-
-| HTTP Method | Purpose | Example |
+| Decorator | Type | Purpose |
 |---|---|---|
-| `GET` | Retrieve data | Get customers |
-| `POST` | Create data | Create customer |
-| `PUT` | Replace or update an existing resource | Update customer |
-| `PATCH` | Partially update an existing resource | Update customer email |
-| `DELETE` | Delete a resource | Delete customer |
-| `HEAD` | Retrieve response headers without the response body | Check resource metadata |
-| `OPTIONS` | Retrieve communication options supported by a resource | Check supported methods |
+| `@Component` | Class | Defines a component |
+| `@Directive` | Class | Defines a directive |
+| `@Pipe` | Class | Defines a custom pipe |
+| `@Injectable` | Class | Enables dependency injection |
+| `@Input` | Property | Receives data from a parent |
+| `@Output` | Property | Emits events to a parent |
+| `@HostListener` | Method | Listens for host events |
+| `@HostBinding` | Property | Binds properties, attributes, or classes of the host |
 
-Angular `HttpClient` provides corresponding methods such as:
+# Why Angular Uses Decorators
 
-```typescript
-http.get()
-http.post()
-http.put()
-http.patch()
-http.delete()
-http.head()
-http.options()
-```
+Decorators provide Angular with metadata that describes how application classes and members should work.
 
-For REST API development, `GET`, `POST`, `PUT`, `PATCH`, and `DELETE` are the methods most commonly used by application code.
-
-# Setting Up HttpClient
-
-Modern standalone Angular applications configure `HttpClient` using:
+For example:
 
 ```typescript
-provideHttpClient()
-```
-
-Angular recommends configuring `HttpClient` this way rather than using the older module-based approach.
-
-# Practical Example — Customer REST API
-
-For this lesson, we will build a Customer Management example.
-
-The application will demonstrate:
-
-```text
-Customer Management
-├── Get all customers
-├── Get customer by ID
-├── Create customer
-├── Update customer
-├── Partially update customer
-└── Delete customer
-```
-
-The Customer component will provide a simple UI for performing the REST API operations directly from the browser.
-
-Create/use **initial Angular project skeleton (from lesson-04)** and create the `customer` component and `customer` service.
-
-```bash
-ng new my-angular-application
-ng g c customer
-ng g s services/customer
-```
-
-Then implement HTTP communication step by step.
-
-### Step 1: Configure HttpClient
-
-Open:
-
-```text
-src/app/app.config.ts
-```
-
-Update it:
-
-```typescript
-import { ApplicationConfig } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideHttpClient()
-  ]
-};
-```
-
-`provideHttpClient()` makes `HttpClient` available for dependency injection throughout the application.
-
-### Step 2: Create the Customer Model
-
-Create:
-
-```text
-src/app/models/customer.ts
-```
-
-Add:
-
-```typescript
-export interface Customer {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  city: string;
+@Component({
+  selector: 'app-customer'
+})
+export class Customer {
 }
 ```
 
-The interface describes the structure of customer data returned by the API.
+`@Component` tells Angular that the `Customer` class represents an Angular component.
 
-### Step 3: Create the Customer Service
-
-Open:
-
-```text
-src/app/services/customer.ts
-```
-
-Update it:
+Similarly:
 
 ```typescript
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Customer } from '../models/customer';
-
 @Injectable({
   providedIn: 'root'
 })
 export class CustomerService {
-
-  private http = inject(HttpClient);
-
-  private apiUrl = 'http://localhost:3000/customers';
-
-  getCustomers(): Observable<Customer[]> {
-    return this.http.get<Customer[]>(this.apiUrl);
-  }
-
-  getCustomerById(id: number): Observable<Customer> {
-    return this.http.get<Customer>(`${this.apiUrl}/${id}`);
-  }
-
-  createCustomer(customer: Omit<Customer, 'id'>): Observable<Customer> {
-    return this.http.post<Customer>(this.apiUrl, customer);
-  }
-
-  updateCustomer(customer: Customer): Observable<Customer> {
-    return this.http.put<Customer>(
-      `${this.apiUrl}/${customer.id}`,
-      customer
-    );
-  }
-
-  patchCustomer(
-    id: number,
-    changes: Partial<Customer>
-  ): Observable<Customer> {
-    return this.http.patch<Customer>(
-      `${this.apiUrl}/${id}`,
-      changes
-    );
-  }
-
-  deleteCustomer(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  }
-
-  checkCustomer(id: number): Observable<void> {
-    return this.http.head<void>(`${this.apiUrl}/${id}`);
-  }
-
-  getCustomerOptions(): Observable<any> {
-    return this.http.options<any>(this.apiUrl);
-  }
 }
 ```
 
-The service now contains examples for:
+`@Injectable` tells Angular that `CustomerService` can participate in dependency injection.
 
-```text
-GET
-POST
-PUT
-PATCH
-DELETE
-HEAD
-OPTIONS
-```
+# Types of Angular Decorators
 
-Angular recommends isolating data-access logic in reusable injectable services rather than placing HTTP calls directly inside components.
+| Type | Decorators | Purpose |
+|---|---|---|
+| Class decorators | `@Component`, `@Directive`, `@Pipe`, `@Injectable` | Configure a class |
+| Property decorators | `@Input`, `@Output`, `@HostBinding` | Configure properties |
+| Method decorators | `@HostListener` | Configure methods |
 
-### Step 4: Understand the GET Request
+# Practical Examples
 
-The service uses:
+Create/use the **existing Angular project from the previous lessons** (from lesson-04).
 
-```typescript
-return this.http.get<Customer[]>(this.apiUrl);
-```
-
-This sends a `GET` request to:
-
-```text
-http://localhost:3000/customers
-```
-
-The generic type:
-
-```typescript
-<Customer[]>
-```
-
-indicates that the expected response is an array of `Customer` objects.
-
-Angular supports typed response values through generic type parameters. These types describe what the application expects; `HttpClient` does not runtime-validate that the server response actually matches the TypeScript type.
-
-### Step 5: Create Sample API Data
-
-For this lesson, we can use JSON Server as a simple local REST API.
-
-Install JSON Server:
+The project was originally created using:
 
 ```bash
-npm install -g json-server
+ng new my-angular-application
 ```
 
-Create:
+We will continue using the same project for this lesson.
 
-```text
-db.json
-```
+Each example below demonstrates one specific decorator or a closely related group of decorators.
 
-at the project root:
+# Example 1 — `@Component`
 
-```json
-{
-  "customers": [
-    {
-      "id": 1,
-      "name": "Siraj Chaudhary",
-      "email": "siraj@example.com",
-      "phone": "9876543210",
-      "city": "Hyderabad"
-    },
-    {
-      "id": 2,
-      "name": "Ahmed Khan",
-      "email": "ahmed@example.com",
-      "phone": "9876543211",
-      "city": "Pune"
-    },
-    {
-      "id": 3,
-      "name": "John Smith",
-      "email": "john@example.com",
-      "phone": "9876543212",
-      "city": "Bengaluru"
-    },
-    {
-      "id": 4,
-      "name": "Priya Sharma",
-      "email": "priya@example.com",
-      "phone": "9876543213",
-      "city": "Mumbai"
-    },
-    {
-      "id": 5,
-      "name": "David Wilson",
-      "email": "david@example.com",
-      "phone": "9876543214",
-      "city": "Chennai"
-    }
-  ]
-}
-```
+### What Does `@Component` Do?
 
-Start the API:
+The `@Component` decorator tells Angular that a class represents a component.
+
+It provides metadata such as:
+
+- Component selector
+- Template
+- Styles
+- Imported dependencies
+- Providers
+
+### Create the Component
 
 ```bash
-json-server --watch db.json
+ng g c customer
 ```
-
-The API will be available at:
-
-```text
-http://localhost:3000/customers
-```
-
-<img width="3840" height="1308" alt="image" src="https://github.com/user-attachments/assets/1bd5d50a-d1c6-4140-a5f2-ba6ed9c2cc2a" />
-
-### Step 6: Open the Customer Component
 
 Open:
 
@@ -322,156 +95,24 @@ Open:
 src/app/customer/customer.ts
 ```
 
-Update it:
+Update:
 
 ```typescript
-import { Component, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { CustomerService } from '../services/customer';
-import { Customer as CustomerModel } from '../models/customer';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-customer',
-  imports: [FormsModule],
+  imports: [],
   templateUrl: './customer.html',
   styleUrl: './customer.css'
 })
 export class Customer {
 
-  private customerService = inject(CustomerService);
-
-  customers: CustomerModel[] = [];
-
-  selectedCustomer: CustomerModel | null = null;
-
-  customerId = 1;
-
-  newCustomer = {
-    name: '',
-    email: '',
-    phone: '',
-    city: ''
-  };
-
-  updateForm: CustomerModel = {
-    id: 1,
-    name: '',
-    email: '',
-    phone: '',
-    city: ''
-  };
-
-  patchId = 1;
-  patchEmail = '';
-
-  deleteId = 1;
-
-  loadCustomers(): void {
-    this.customerService.getCustomers().subscribe({
-      next: (customers) => {
-        this.customers = customers;
-      },
-      error: (error) => {
-        console.error('Failed to load customers:', error);
-      }
-    });
-  }
-
-  loadCustomerById(): void {
-    this.customerService.getCustomerById(this.customerId).subscribe({
-      next: (customer) => {
-        this.selectedCustomer = customer;
-      },
-      error: (error) => {
-        console.error('Failed to load customer:', error);
-      }
-    });
-  }
-
-  createCustomer(): void {
-    this.customerService.createCustomer(this.newCustomer).subscribe({
-      next: (customer) => {
-        console.log('Created customer:', customer);
-        this.newCustomer = {
-          name: '',
-          email: '',
-          phone: '',
-          city: ''
-        };
-        this.loadCustomers();
-      },
-      error: (error) => {
-        console.error('Failed to create customer:', error);
-      }
-    });
-  }
-
-  updateCustomer(): void {
-    this.customerService.updateCustomer(this.updateForm).subscribe({
-      next: (customer) => {
-        console.log('Updated customer:', customer);
-        this.loadCustomers();
-      },
-      error: (error) => {
-        console.error('Failed to update customer:', error);
-      }
-    });
-  }
-
-  patchCustomer(): void {
-    this.customerService.patchCustomer(
-      this.patchId,
-      { email: this.patchEmail }
-    ).subscribe({
-      next: (customer) => {
-        console.log('Patched customer:', customer);
-        this.loadCustomers();
-      },
-      error: (error) => {
-        console.error('Failed to patch customer:', error);
-      }
-    });
-  }
-
-  deleteCustomer(): void {
-    this.customerService.deleteCustomer(this.deleteId).subscribe({
-      next: () => {
-        console.log('Customer deleted successfully.');
-        this.loadCustomers();
-      },
-      error: (error) => {
-        console.error('Failed to delete customer:', error);
-      }
-    });
-  }
-
-  checkCustomer(): void {
-    this.customerService.checkCustomer(this.customerId).subscribe({
-      next: () => {
-        console.log('Customer resource exists.');
-      },
-      error: (error) => {
-        console.error('HEAD request failed:', error);
-      }
-    });
-  }
-
-  getCustomerOptions(): void {
-    this.customerService.getCustomerOptions().subscribe({
-      next: (response) => {
-        console.log('OPTIONS response:', response);
-      },
-      error: (error) => {
-        console.error('OPTIONS request failed:', error);
-      }
-    });
-  }
+  name = 'Siraj';
+  email = 'siraj@example.com';
+  city = 'Hyderabad';
 }
 ```
-
-The component contains the UI state and calls the corresponding service method for each API operation. The HTTP implementation remains inside `CustomerService`.
-
-### Step 7: Display Customers and Perform REST API Operations
 
 Open:
 
@@ -479,181 +120,17 @@ Open:
 src/app/customer/customer.html
 ```
 
-Replace the contents with:
+Add:
 
 ```html
-<h1>REST API call with HttpClient</h1>
+<h2>Customer Information</h2>
 
-<h2>Get Customer</h2>
-
-<button (click)="loadCustomers()">
-  Get All Customers
-</button>
-
-@if (customers.length > 0) {
-
-  <h3>Customer List</h3>
-
-  <table border="1">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Phone</th>
-        <th>City</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      @for (customer of customers; track customer.id) {
-        <tr>
-          <td>{{ customer.id }}</td>
-          <td>{{ customer.name }}</td>
-          <td>{{ customer.email }}</td>
-          <td>{{ customer.phone }}</td>
-          <td>{{ customer.city }}</td>
-        </tr>
-      }
-    </tbody>
-  </table>
-
-}
-
-<h2>Get Customer by ID</h2>
-
-<input
-  type="number"
-  [(ngModel)]="customerId">
-
-<button (click)="loadCustomerById()">
-  Get Customer
-</button>
-
-@if (selectedCustomer) {
-  <p>ID: {{ selectedCustomer.id }}</p>
-  <p>Name: {{ selectedCustomer.name }}</p>
-  <p>Email: {{ selectedCustomer.email }}</p>
-  <p>Phone: {{ selectedCustomer.phone }}</p>
-  <p>City: {{ selectedCustomer.city }}</p>
-}
-
-<h2>Create Customer</h2>
-
-<input
-  type="text"
-  placeholder="Name"
-  [(ngModel)]="newCustomer.name">
-
-<input
-  type="email"
-  placeholder="Email"
-  [(ngModel)]="newCustomer.email">
-
-<input
-  type="text"
-  placeholder="Phone"
-  [(ngModel)]="newCustomer.phone">
-
-<input
-  type="text"
-  placeholder="City"
-  [(ngModel)]="newCustomer.city">
-
-<button (click)="createCustomer()">
-  Create Customer
-</button>
-
-<h2>Update Customer</h2>
-
-<input
-  type="number"
-  placeholder="ID"
-  [(ngModel)]="updateForm.id">
-
-<input
-  type="text"
-  placeholder="Name"
-  [(ngModel)]="updateForm.name">
-
-<input
-  type="email"
-  placeholder="Email"
-  [(ngModel)]="updateForm.email">
-
-<input
-  type="text"
-  placeholder="Phone"
-  [(ngModel)]="updateForm.phone">
-
-<input
-  type="text"
-  placeholder="City"
-  [(ngModel)]="updateForm.city">
-
-<button (click)="updateCustomer()">
-  Update Customer
-</button>
-
-<h2>Patch Customer</h2>
-
-<input
-  type="number"
-  placeholder="Customer ID"
-  [(ngModel)]="patchId">
-
-<input
-  type="email"
-  placeholder="New Email"
-  [(ngModel)]="patchEmail">
-
-<button (click)="patchCustomer()">
-  Update Email
-</button>
-
-<h2>Delete Customer</h2>
-
-<input
-  type="number"
-  placeholder="Customer ID"
-  [(ngModel)]="deleteId">
-
-<button (click)="deleteCustomer()">
-  Delete Customer
-</button>
-
-<h2>HEAD Request</h2>
-
-<input
-  type="number"
-  placeholder="Customer ID"
-  [(ngModel)]="customerId">
-
-<button (click)="checkCustomer()">
-  Check Customer
-</button>
-
-<h2>OPTIONS Request</h2>
-
-<button (click)="getCustomerOptions()">
-  Get API Options
-</button>
+<p><strong>Name:</strong> {{ name }}</p>
+<p><strong>Email:</strong> {{ email }}</p>
+<p><strong>City:</strong> {{ city }}</p>
 ```
 
-This page demonstrates:
-
-```text
-GET       → Get all customers
-GET       → Get customer by ID
-POST      → Create customer
-PUT       → Update customer
-PATCH     → Partially update customer
-DELETE    → Delete customer
-HEAD      → Check customer resource
-OPTIONS   → Get supported API options
-```
-
-### Step 8: Add the Customer Component to the Root Component
+### Use the Component
 
 Open:
 
@@ -661,10 +138,10 @@ Open:
 src/app/app.ts
 ```
 
-Update it:
+Import the component:
 
 ```typescript
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { Customer } from './customer/customer';
 
 @Component({
@@ -674,11 +151,8 @@ import { Customer } from './customer/customer';
   styleUrl: './app.css'
 })
 export class App {
-  protected readonly title = signal('my-angular-application');
 }
 ```
-
-### Step 9: Render the Customer Component
 
 Open:
 
@@ -689,256 +163,1150 @@ src/app/app.html
 Add:
 
 ```html
+<h1>Angular Decorators</h1>
+
 <app-customer></app-customer>
 ```
 
-### Step 10: Run the Application
+### Result
 
-Start the API:
+The application displays:
 
-```bash
-json-server --watch db.json
+```text
+Angular Decorators
+
+Customer Information
+
+Name: Siraj
+Email: siraj@example.com
+City: Hyderabad
 ```
 
-In another terminal, start Angular:
+### Decorator Used
+
+```text
+@Component
+```
+
+### Purpose
+
+```text
+Defines an Angular component
+```
+
+<img width="3840" height="578" alt="image" src="https://github.com/user-attachments/assets/c31d63e4-843c-46fc-82f6-72c5454bc01c" />
+
+# Example 2 — `@Directive`
+
+### What Does `@Directive` Do?
+
+The `@Directive` decorator tells Angular that a class represents a directive.
+
+In this example, the directive will visibly change the appearance of an element when the directive is applied.
+
+### Create the Directive
 
 ```bash
-ng serve
+ng g directive directives/highlight
 ```
 
 Open:
 
 ```text
-http://localhost:4200
+src/app/directives/highlight.ts
 ```
 
-The page now provides a basic UI for performing the REST API operations.
-<br /><br />
-<img width="3840" height="1840" alt="image" src="https://github.com/user-attachments/assets/e1681abc-894e-484e-abec-c449a618c40b" />
-
-# REST API Operations
-
-The customer service exposes the following REST API operations:
-
-| Operation | HTTP Method | Endpoint | Purpose |
-|---|---|---|---|
-| Get all customers | `GET` | `/customers` | Retrieve all customers |
-| Get customer | `GET` | `/customers/{id}` | Retrieve one customer |
-| Create customer | `POST` | `/customers` | Create a new customer |
-| Update customer | `PUT` | `/customers/{id}` | Replace an existing customer |
-| Partially update customer | `PATCH` | `/customers/{id}` | Update selected fields |
-| Delete customer | `DELETE` | `/customers/{id}` | Delete a customer |
-| Check customer | `HEAD` | `/customers/{id}` | Retrieve headers without a response body |
-| Get API options | `OPTIONS` | `/customers` | Retrieve supported communication options |
-
-# Query Parameters
-
-HTTP requests can include query parameters.
-
-Angular provides `HttpParams` for this purpose.
-
-Example:
+Update:
 
 ```typescript
-import { HttpParams } from '@angular/common/http';
-```
+import {
+  Directive,
+  HostBinding,
+  HostListener
+} from '@angular/core';
 
-Then:
+@Directive({
+  selector: '[appHighlight]'
+})
+export class Highlight {
 
-```typescript
-searchCustomers(name: string): Observable<Customer[]> {
+  @HostBinding('style.backgroundColor')
+  backgroundColor = '';
 
-  const params = new HttpParams()
-    .set('name', name);
+  @HostBinding('style.color')
+  color = '';
 
-  return this.http.get<Customer[]>(
-    this.apiUrl,
-    { params }
-  );
-}
-```
-
-This can produce a request such as:
-
-```text
-GET /customers?name=Siraj
-```
-
-# HTTP Headers
-
-HTTP headers can be supplied using `HttpHeaders`.
-
-Example:
-
-```typescript
-import { HttpHeaders } from '@angular/common/http';
-```
-
-Then:
-
-```typescript
-const headers = new HttpHeaders({
-  'Content-Type': 'application/json'
-});
-
-return this.http.get<Customer[]>(
-  this.apiUrl,
-  { headers }
-);
-```
-
-In real applications, authentication headers are often handled centrally using an HTTP interceptor rather than manually adding them to every request.
-
-# HTTP Error Handling
-
-HTTP requests can fail because of:
-
-- Network errors.
-- Backend errors.
-- Timeout errors.
-- Invalid requests.
-- Server errors.
-
-Angular reports HTTP failures through `HttpErrorResponse`.
-
-Example:
-
-```typescript
-this.customerService.getCustomers().subscribe({
-  next: (customers) => {
-    this.customers = customers;
-  },
-  error: (error) => {
-    console.error('HTTP Status:', error.status);
-    console.error('HTTP Error:', error);
+  @HostListener('mouseenter')
+  onMouseEnter(): void {
+    this.backgroundColor = 'yellow';
+    this.color = 'black';
   }
-});
-```
 
-For reusable error handling, RxJS provides operators such as:
-
-```text
-catchError()
-```
-
-and:
-
-```text
-retry()
-```
-
-# Loading State
-
-A UI should normally indicate when an HTTP request is in progress.
-
-For example, in the component:
-
-```typescript
-isLoading = false;
-
-loadCustomers(): void {
-
-  this.isLoading = true;
-
-  this.customerService.getCustomers().subscribe({
-    next: (customers) => {
-      this.customers = customers;
-      this.isLoading = false;
-    },
-    error: (error) => {
-      console.error('Failed to load customers:', error);
-      this.isLoading = false;
-    }
-  });
+  @HostListener('mouseleave')
+  onMouseLeave(): void {
+    this.backgroundColor = '';
+    this.color = '';
+  }
 }
 ```
 
-Then in the template:
+### Use the Directive
+
+Add the directive to the `Customer` component's imports:
+
+```typescript
+import { Component } from '@angular/core';
+import { Highlight } from '../directives/highlight';
+
+@Component({
+  selector: 'app-customer',
+  imports: [Highlight],
+  templateUrl: './customer.html',
+  styleUrl: './customer.css'
+})
+export class Customer {
+
+  name = 'Siraj';
+  email = 'siraj@example.com';
+  city = 'Hyderabad';
+}
+```
+
+Open:
+
+```text
+src/app/customer/customer.html
+```
+
+Add:
 
 ```html
-@if (isLoading) {
-  <p>Loading customers...</p>
+<h2>Customer Information</h2>
+
+<p appHighlight>
+  Move the mouse over this text.
+</p>
+
+<p><strong>Name:</strong> {{ name }}</p>
+<p><strong>Email:</strong> {{ email }}</p>
+<p><strong>City:</strong> {{ city }}</p>
+```
+
+### Result
+
+When the mouse moves over:
+
+```text
+Move the mouse over this text.
+```
+
+the background becomes yellow and the text becomes black.
+
+When the mouse leaves, the original styling is restored.
+
+### Decorator Used
+
+```text
+@Directive
+```
+
+### Purpose
+
+```text
+Defines a custom Angular directive
+```
+
+<img width="3840" height="698" alt="image" src="https://github.com/user-attachments/assets/86438704-f79e-4e72-b989-452efa6af829" />
+
+# Example 3 — `@Pipe`
+
+### What Does `@Pipe` Do?
+
+The `@Pipe` decorator tells Angular that a class represents a custom pipe.
+
+In this example, the pipe converts the first character of a string to uppercase.
+
+### Create the Pipe
+
+```bash
+ng g pipe pipes/capitalize
+```
+
+Open:
+
+```text
+src/app/pipes/capitalize-pipe.ts
+```
+
+Update:
+
+```typescript
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({
+  name: 'capitalize'
+})
+export class Capitalize implements PipeTransform {
+
+  transform(value: string): string {
+
+    if (!value) {
+      return '';
+    }
+
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  }
 }
 ```
 
-# Observables and HttpClient
+### Use the Pipe
 
-Each `HttpClient` request returns an RxJS `Observable`.
-
-For example:
+Add the pipe to the `Customer` component's imports:
 
 ```typescript
-this.http.get<Customer[]>(this.apiUrl)
+import { Component } from '@angular/core';
+import { Capitalize } from '../pipes/capitalize-pipe';
+
+@Component({
+  selector: 'app-customer',
+  imports: [Capitalize],
+  templateUrl: './customer.html',
+  styleUrl: './customer.css'
+})
+export class Customer {
+
+  name = 'siraj';
+}
 ```
 
-returns:
+Open:
 
 ```text
-Observable<Customer[]>
+src/app/customer/customer.html
 ```
 
-The request is sent when the observable is subscribed to:
+Add:
+
+```html
+<h2>Customer Name</h2>
+
+<p>Original: {{ name }}</p>
+
+<p>Capitalized: {{ name | capitalize }}</p>
+```
+
+### Result
+
+```text
+Original: siraj
+
+Capitalized: Siraj
+```
+
+### Decorator Used
+
+```text
+@Pipe
+```
+
+### Purpose
+
+```text
+Defines a custom Angular pipe
+```
+
+<img width="3840" height="548" alt="image" src="https://github.com/user-attachments/assets/dfae6565-b840-4e08-9d3c-56f89d19d6de" />
+
+# Example 4 — `@Injectable`
+
+### What Does `@Injectable` Do?
+
+The `@Injectable` decorator tells Angular that a class can participate in dependency injection.
+
+In this example, the service provides customer information to the component.
+
+### Create the Service
+
+```bash
+ng g s services/customer
+```
+
+Angular generates:
+
+```text
+src/app/services/customer.ts
+```
+
+Update:
 
 ```typescript
-this.customerService.getCustomers().subscribe({
-  next: (customers) => {
-    console.log(customers);
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class Customer {
+
+  getCustomerName(): string {
+    return 'Siraj';
   }
-});
+
+  getCustomerEmail(): string {
+    return 'siraj@example.com';
+  }
+}
 ```
 
-Angular's `HttpClient` observables are cold, meaning a request is not dispatched until subscription occurs. Each subscription can trigger a new backend request.
+### Use the Service
 
-# Typed HTTP Responses
+Because both the component and service are named `Customer`, use an import alias for the service.
 
-Angular supports generic types for HTTP responses.
-
-Example:
-
-```typescript
-this.http.get<Customer[]>(this.apiUrl);
-```
-
-The expected response type is:
+Open:
 
 ```text
-Customer[]
+src/app/customer/customer.ts
 ```
 
-For a single customer:
+Update:
 
 ```typescript
-this.http.get<Customer>(
-  `${this.apiUrl}/${id}`
-);
+import { Component, inject } from '@angular/core';
+import { Customer as CustomerService } from '../services/customer';
+
+@Component({
+  selector: 'app-customer',
+  imports: [],
+  templateUrl: './customer.html',
+  styleUrl: './customer.css'
+})
+export class Customer {
+
+  private customerService = inject(CustomerService);
+
+  customerName = this.customerService.getCustomerName();
+  customerEmail = this.customerService.getCustomerEmail();
+}
 ```
 
-The expected response type is:
+Open:
 
 ```text
-Customer
+src/app/customer/customer.html
 ```
 
-This provides compile-time type information while working with API data.
+Add:
 
-Remember that the generic type does not validate the actual server response at runtime.
+```html
+<h2>Customer Information</h2>
 
-# HTTP Interceptors
+<p>
+  <strong>Name:</strong>
+  {{ customerName }}
+</p>
 
-Interceptors allow common HTTP behavior to be handled centrally.
+<p>
+  <strong>Email:</strong>
+  {{ customerEmail }}
+</p>
+```
 
-They can be used for:
+### Result
 
-- Authentication.
-- Logging.
-- Adding headers.
-- Retry logic.
-- Caching.
-- Error handling.
+The component receives the customer information from the injected service.
 
-Angular currently recommends functional interceptors because they provide more predictable behavior, particularly in complex applications.
+```text
+Name: Siraj
+Email: siraj@example.com
+```
 
-A later lesson can cover HTTP interceptors in greater detail.
+### Decorator Used
+
+```text
+@Injectable
+```
+
+### Purpose
+
+```text
+Allows a class to participate in Angular dependency injection
+```
+
+<img width="3840" height="520" alt="image" src="https://github.com/user-attachments/assets/d9cb0a09-e0d4-4a24-aff5-616465baaacc" />
+
+# Example 5 — `@Input`
+
+### What Does `@Input` Do?
+
+The `@Input` decorator allows a child component to receive data from its parent.
+
+In this example, the `Customer` component sends a customer name to the `CustomerDetails` child component.
+
+### Create the Child Component
+
+```bash
+ng g c customer-details
+```
+
+Open:
+
+```text
+src/app/customer-details/customer-details.ts
+```
+
+Update:
+
+```typescript
+import { Component, Input } from '@angular/core';
+
+@Component({
+  selector: 'app-customer-details',
+  imports: [],
+  templateUrl: './customer-details.html',
+  styleUrl: './customer-details.css'
+})
+export class CustomerDetails {
+
+  @Input()
+  name = '';
+}
+```
+
+Open:
+
+```text
+src/app/customer-details/customer-details.html
+```
+
+Add:
+
+```html
+<h3>Customer Details</h3>
+
+<p>
+  Customer Name: {{ name }}
+</p>
+```
+
+### Pass Data from the Parent
+
+Open:
+
+```text
+src/app/customer/customer.ts
+```
+
+Import the child component:
+
+```typescript
+import { Component } from '@angular/core';
+import { CustomerDetails } from '../customer-details/customer-details';
+
+@Component({
+  selector: 'app-customer',
+  imports: [CustomerDetails],
+  templateUrl: './customer.html',
+  styleUrl: './customer.css'
+})
+export class Customer {
+
+  customerName = 'Siraj';
+}
+```
+
+Open:
+
+```text
+src/app/customer/customer.html
+```
+
+Add:
+
+```html
+<h2>Customer</h2>
+
+<app-customer-details
+  [name]="customerName">
+</app-customer-details>
+```
+
+### Result
+
+The parent passes:
+
+```text
+Siraj
+```
+
+to the child component through:
+
+```html
+[name]="customerName"
+```
+
+The child receives it through:
+
+```typescript
+@Input()
+name = '';
+```
+
+### Data Flow
+
+```text
+Parent Component
+       |
+       | [name]
+       ↓
+CustomerDetails Component
+       |
+       | @Input()
+       ↓
+name property
+```
+
+### Decorator Used
+
+```text
+@Input
+```
+
+### Purpose
+
+```text
+Receives data from a parent component
+```
+
+<img width="3840" height="544" alt="image" src="https://github.com/user-attachments/assets/53d0a90b-cb4e-470d-b1e3-0dd081b8e304" />
+
+# Example 6 — `@Output`
+
+### What Does `@Output` Do?
+
+The `@Output` decorator allows a child component to send an event to its parent.
+
+In this example, the `CustomerDetails` component emits the selected customer name when the user clicks a button.
+
+### Update the Child Component
+
+Open:
+
+```text
+src/app/customer-details/customer-details.ts
+```
+
+Update:
+
+```typescript
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output
+} from '@angular/core';
+
+@Component({
+  selector: 'app-customer-details',
+  imports: [],
+  templateUrl: './customer-details.html',
+  styleUrl: './customer-details.css'
+})
+export class CustomerDetails {
+
+  @Input()
+  name = '';
+
+  @Output()
+  selected = new EventEmitter<string>();
+
+  selectCustomer(): void {
+    this.selected.emit(this.name);
+  }
+}
+```
+
+Open:
+
+```text
+src/app/customer-details/customer-details.html
+```
+
+Update:
+
+```html
+<h3>Customer Details</h3>
+
+<p>
+  Customer Name: {{ name }}
+</p>
+
+<button
+  type="button"
+  (click)="selectCustomer()">
+  Select Customer
+</button>
+```
+
+### Listen in the Parent
+
+Open:
+
+```text
+src/app/customer/customer.ts
+```
+
+Update:
+
+```typescript
+import { Component } from '@angular/core';
+import { CustomerDetails } from '../customer-details/customer-details';
+
+@Component({
+  selector: 'app-customer',
+  imports: [CustomerDetails],
+  templateUrl: './customer.html',
+  styleUrl: './customer.css'
+})
+export class Customer {
+
+  customerName = 'Siraj';
+
+  selectedCustomer = '';
+
+  onCustomerSelected(name: string): void {
+    this.selectedCustomer = name;
+  }
+}
+```
+
+Open:
+
+```text
+src/app/customer/customer.html
+```
+
+Update:
+
+```html
+<h2>Customer</h2>
+
+<app-customer-details
+  [name]="customerName"
+  (selected)="onCustomerSelected($event)">
+</app-customer-details>
+
+@if (selectedCustomer) {
+  <p>
+    Selected Customer: {{ selectedCustomer }}
+  </p>
+}
+```
+
+### Result
+
+Initially:
+
+```text
+Customer Name: Siraj
+
+[ Select Customer ]
+```
+
+After clicking the button:
+
+```text
+Customer Name: Siraj
+
+[ Select Customer ]
+
+Selected Customer: Siraj
+```
+
+### Data Flow
+
+```text
+Child Component
+       |
+       | selected.emit()
+       ↓
+Parent Component
+       |
+       | (selected)
+       ↓
+onCustomerSelected()
+```
+
+### Decorator Used
+
+```text
+@Output
+```
+
+### Purpose
+
+```text
+Emits an event from a child component to its parent
+```
+
+<img width="3840" height="690" alt="image" src="https://github.com/user-attachments/assets/bd86b41b-bfb0-4113-846e-ab6cbfa91010" />
+
+# Example 7 — `@HostListener`
+
+### What Does `@HostListener` Do?
+
+The `@HostListener` decorator allows a directive to listen for events on its host element.
+
+In this example, the directive listens for `mouseenter` and `mouseleave` events and changes a message.
+
+### Create the Directive
+
+```bash
+ng g directive directives/mouseTracker
+```
+
+Open:
+
+```text
+src/app/directives/mouse-tracker.ts
+```
+
+Update:
+
+```typescript
+import {
+  Directive,
+  HostListener,
+  Output,
+  EventEmitter
+} from '@angular/core';
+
+@Directive({
+  selector: '[appMouseTracker]'
+})
+export class MouseTracker {
+
+  @Output()
+  mouseStatus = new EventEmitter<string>();
+
+  @HostListener('mouseenter')
+  onMouseEnter(): void {
+    this.mouseStatus.emit('Mouse entered the element');
+  }
+
+  @HostListener('mouseleave')
+  onMouseLeave(): void {
+    this.mouseStatus.emit('Mouse left the element');
+  }
+}
+```
+
+### Use the Directive
+
+Open:
+
+```text
+src/app/customer/customer.ts
+```
+
+Add the directive:
+
+```typescript
+import { Component } from '@angular/core';
+import { MouseTracker } from '../directives/mouse-tracker';
+
+@Component({
+  selector: 'app-customer',
+  imports: [MouseTracker],
+  templateUrl: './customer.html',
+  styleUrl: './customer.css'
+})
+export class Customer {
+
+  mouseMessage = 'Move the mouse over the box.';
+}
+```
+
+Open:
+
+```text
+src/app/customer/customer.html
+```
+
+Add:
+
+```html
+<h2>Host Listener Example</h2>
+
+<div
+  appMouseTracker
+  (mouseStatus)="mouseMessage = $event"
+  style="padding: 30px; border: 1px solid #999; width: 300px;">
+
+  Move your mouse over this box.
+</div>
+
+<p>{{ mouseMessage }}</p>
+```
+
+### Result
+
+When the mouse enters the box:
+
+```text
+Mouse entered the element
+```
+
+When the mouse leaves the box:
+
+```text
+Mouse left the element
+```
+
+### Decorator Used
+
+```text
+@HostListener
+```
+
+### Purpose
+
+```text
+Listens for events on the host element
+```
+
+<img width="3840" height="662" alt="image" src="https://github.com/user-attachments/assets/617fc8af-57a2-4d0f-8855-45b1063b2500" />
+
+# Example 8 — `@HostBinding`
+
+### What Does `@HostBinding` Do?
+
+The `@HostBinding` decorator binds a property, attribute, or CSS class to the host element.
+
+In this example, the directive automatically applies a border and background color to the element.
+
+### Create the Directive
+
+```bash
+ng g directive directives/cardStyle
+```
+
+Open:
+
+```text
+src/app/directives/card-style.ts
+```
+
+Update:
+
+```typescript
+import {
+  Directive,
+  HostBinding
+} from '@angular/core';
+
+@Directive({
+  selector: '[appCardStyle]'
+})
+export class CardStyle {
+
+  @HostBinding('style.border')
+  border = '2px solid steelblue';
+
+  @HostBinding('style.padding')
+  padding = '20px';
+
+  @HostBinding('style.borderRadius')
+  borderRadius = '8px';
+
+  @HostBinding('style.backgroundColor')
+  backgroundColor = '#f5f9ff';
+}
+```
+
+### Use the Directive
+
+Open:
+
+```text
+src/app/customer/customer.ts
+```
+
+Add the directive:
+
+```typescript
+import { Component } from '@angular/core';
+import { CardStyle } from '../directives/card-style';
+
+@Component({
+  selector: 'app-customer',
+  imports: [CardStyle],
+  templateUrl: './customer.html',
+  styleUrl: './customer.css'
+})
+export class Customer {
+}
+```
+
+Open:
+
+```text
+src/app/customer/customer.html
+```
+
+Add:
+
+```html
+<h2>Host Binding Example</h2>
+
+<div appCardStyle>
+  <h3>Customer Card</h3>
+
+  <p>Name: Siraj</p>
+  <p>Email: siraj@example.com</p>
+</div>
+```
+
+### Result
+
+The `<div>` automatically receives:
+
+- A border
+- Padding
+- Rounded corners
+- A background color
+
+The styles are applied through `@HostBinding`.
+
+### Decorator Used
+
+```text
+@HostBinding
+```
+
+### Purpose
+
+```text
+Binds properties, attributes, or CSS classes to the host element
+```
+
+<img width="3840" height="760" alt="image" src="https://github.com/user-attachments/assets/8fcd9b9f-5c8c-470f-86cc-60333f711ca7" />
+
+# Example 9 — Combining `@HostListener` and `@HostBinding`
+
+`@HostListener` and `@HostBinding` are often useful together.
+
+In this example, moving the mouse over the element changes its background color.
+
+### Create the Directive
+
+```bash
+ng g directive directives/hoverCard
+```
+
+Open:
+
+```text
+src/app/directives/hover-card.ts
+```
+
+Update:
+
+```typescript
+import {
+  Directive,
+  HostBinding,
+  HostListener
+} from '@angular/core';
+
+@Directive({
+  selector: '[appHoverCard]'
+})
+export class HoverCard {
+
+  @HostBinding('style.backgroundColor')
+  backgroundColor = '#f5f5f5';
+
+  @HostBinding('style.padding')
+  padding = '20px';
+
+  @HostBinding('style.border')
+  border = '1px solid #999';
+
+  @HostBinding('style.borderRadius')
+  borderRadius = '8px';
+
+  @HostListener('mouseenter')
+  onMouseEnter(): void {
+    this.backgroundColor = '#fff3cd';
+  }
+
+  @HostListener('mouseleave')
+  onMouseLeave(): void {
+    this.backgroundColor = '#f5f5f5';
+  }
+}
+```
+
+### Use the Directive
+
+Open:
+
+```text
+src/app/customer/customer.ts
+```
+
+Import the directive:
+
+```typescript
+import { Component } from '@angular/core';
+import { HoverCard } from '../directives/hover-card';
+
+@Component({
+  selector: 'app-customer',
+  imports: [HoverCard],
+  templateUrl: './customer.html',
+  styleUrl: './customer.css'
+})
+export class Customer {
+}
+```
+
+Open:
+
+```text
+src/app/customer/customer.html
+```
+
+Add:
+
+```html
+<h2>HostListener + HostBinding</h2>
+
+<div appHoverCard>
+  <h3>Customer Card</h3>
+
+  <p>Move your mouse over this card.</p>
+</div>
+```
+
+### Result
+
+When the mouse enters the card:
+
+```text
+HostListener
+      ↓
+onMouseEnter()
+      ↓
+backgroundColor changes
+      ↓
+HostBinding
+      ↓
+Host element changes
+```
+
+When the mouse leaves the card, the original background color is restored.
+
+### Decorators Used
+
+```text
+@HostListener
+@HostBinding
+```
+
+### Purpose
+
+| Decorator | Responsibility |
+|---|---|
+| `@HostListener` | Listens for events on the host element |
+| `@HostBinding` | Changes properties of the host element |
+
+<br />
+<img width="3840" height="670" alt="image" src="https://github.com/user-attachments/assets/87684122-0bdc-4c0e-8cb1-94c0babb6380" />
+
+# Modern Angular APIs
+
+Angular provides modern APIs for several patterns that were traditionally implemented using decorators.
+
+| Traditional API | Modern Angular API |
+|---|---|
+| `@Input()` | `input()` |
+| `@Output()` | `output()` |
+| `@HostBinding()` | `host` metadata |
+| `@HostListener()` | `host` metadata |
+
+### Modern Input
+
+Traditional:
+
+```typescript
+@Input()
+name = '';
+```
+
+Modern:
+
+```typescript
+name = input<string>('');
+```
+
+### Modern Output
+
+Traditional:
+
+```typescript
+@Output()
+selected = new EventEmitter<string>();
+```
+
+Modern:
+
+```typescript
+selected = output<string>();
+```
+
+### Modern Host Configuration
+
+Instead of:
+
+```typescript
+@HostListener('mouseenter')
+onMouseEnter(): void {
+  this.backgroundColor = 'yellow';
+}
+```
+
+Host behavior can be configured using `host` metadata:
+
+```typescript
+@Directive({
+  selector: '[appHighlight]',
+  host: {
+    '(mouseenter)': 'onMouseEnter()',
+    '[style.backgroundColor]': 'backgroundColor'
+  }
+})
+export class Highlight {
+
+  backgroundColor = 'yellow';
+
+  onMouseEnter(): void {
+    console.log('Mouse entered');
+  }
+}
+```
+
+The traditional decorators remain important concepts and are commonly encountered in existing Angular applications.
+
+# Decorators vs TypeScript Decorator Syntax
+
+Angular decorators use TypeScript decorator syntax, but Angular gives each decorator a specific Angular meaning.
+
+| Decorator | Angular Meaning |
+|---|---|
+| `@Component({...})` | Configures a component |
+| `@Directive({...})` | Configures a directive |
+| `@Pipe({...})` | Configures a pipe |
+| `@Injectable({...})` | Configures an injectable class |
 
 # Practical Project Structure
 
@@ -956,12 +1324,29 @@ my-angular-application/
 │   │   │   ├── customer.css
 │   │   │   └── customer.spec.ts
 │   │   │
-│   │   ├── models/
-│   │   │   └── customer.ts
+│   │   ├── customer-details/
+│   │   │   ├── customer-details.ts
+│   │   │   ├── customer-details.html
+│   │   │   ├── customer-details.css
+│   │   │   └── customer-details.spec.ts
+│   │   │
+│   │   ├── directives/
+│   │   │   ├── highlight.ts
+│   │   │   ├── highlight.spec.ts
+│   │   │   ├── mouse-tracker.ts
+│   │   │   ├── mouse-tracker.spec.ts
+│   │   │   ├── card-style.ts
+│   │   │   ├── card-style.spec.ts
+│   │   │   ├── hover-card.ts
+│   │   │   └── hover-card.spec.ts
+│   │   │
+│   │   ├── pipes/
+│   │   │   ├── capitalize.ts
+│   │   │   └── capitalize.spec.ts
 │   │   │
 │   │   ├── services/
-│   │   │   ├── customer.service.ts
-│   │   │   └── customer.service.spec.ts
+│   │   │   ├── customer.ts
+│   │   │   └── customer.spec.ts
 │   │   │
 │   │   ├── app.ts
 │   │   ├── app.html
@@ -973,7 +1358,6 @@ my-angular-application/
 │   ├── main.ts
 │   └── styles.css
 │
-├── db.json
 ├── angular.json
 ├── package.json
 ├── package-lock.json
@@ -987,35 +1371,29 @@ my-angular-application/
 
 # Quick Revision
 
-| Concept | Purpose | Example |
-|---|---|---|
-| `HttpClient` | Communicates with backend APIs | `HttpClient` |
-| `provideHttpClient()` | Configures HttpClient | `provideHttpClient()` |
-| `GET` | Retrieve data | `http.get()` |
-| `POST` | Create data | `http.post()` |
-| `PUT` | Update data | `http.put()` |
-| `DELETE` | Delete data | `http.delete()` |
-| `Observable` | Represents asynchronous HTTP result | `Observable<Customer[]>` |
-| `HttpParams` | Sends query parameters | `new HttpParams()` |
-| `HttpHeaders` | Sends HTTP headers | `new HttpHeaders()` |
-| `HttpErrorResponse` | Represents HTTP errors | `HttpErrorResponse` |
-| Generic type | Describes expected response | `get<Customer[]>()` |
-| Service | Encapsulates API logic | `CustomerService` |
-| Interceptor | Handles common HTTP behavior | `withInterceptors()` |
+| Decorator | Category | Purpose | Example |
+|---|---|---|---|
+| `@Component` | Class | Defines a component | `@Component({...})` |
+| `@Directive` | Class | Defines a directive | `@Directive({...})` |
+| `@Pipe` | Class | Defines a custom pipe | `@Pipe({...})` |
+| `@Injectable` | Class | Enables dependency injection | `@Injectable({...})` |
+| `@Input` | Property | Receives parent data | `@Input()` |
+| `@Output` | Property | Emits events to parent | `@Output()` |
+| `@HostListener` | Method | Listens to host events | `@HostListener('click')` |
+| `@HostBinding` | Property | Binds host properties/classes | `@HostBinding('class.active')` |
 
 # Key Takeaways
 
-- Angular applications commonly communicate with backend services using `HttpClient`.
-- Modern standalone Angular applications configure HTTP using `provideHttpClient()`.
-- `HttpClient` supports common HTTP methods such as `GET`, `POST`, `PUT`, and `DELETE`.
-- HTTP methods return RxJS `Observable`s.
-- HTTP requests are sent when the observable is subscribed to.
-- API communication should generally be encapsulated inside reusable services.
-- Generic types can describe expected API response structures.
-- `HttpParams` can be used for query parameters.
-- `HttpHeaders` can be used to send HTTP headers.
-- `HttpErrorResponse` provides information about failed HTTP requests.
-- Loading states can improve the user experience during API calls.
-- RxJS operators such as `catchError` and `retry` can help handle HTTP failures.
-- HTTP interceptors can centralize common concerns such as authentication and logging.
-- Angular's `HttpClient` does not runtime-validate the response against the TypeScript generic type.
+- Decorators use TypeScript decorator syntax to provide Angular-specific metadata.
+- `@Component` defines an Angular component.
+- `@Directive` defines a custom Angular directive.
+- `@Pipe` defines a custom Angular pipe.
+- `@Injectable` enables a class to participate in Angular dependency injection.
+- `@Input` receives data from a parent component.
+- `@Output` emits events from a child component.
+- `@HostListener` listens for events on the host element.
+- `@HostBinding` binds properties, attributes, or classes to the host element.
+- `@HostListener` and `@HostBinding` can be used together to create interactive directives.
+- Modern Angular provides `input()` and `output()` as alternatives to `@Input()` and `@Output()`.
+- Angular also provides `host` metadata for configuring host bindings and event listeners.
+- Understanding both traditional decorators and modern Angular APIs is useful when working with new and existing Angular applications.
