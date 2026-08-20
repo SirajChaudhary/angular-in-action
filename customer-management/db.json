@@ -1,0 +1,39 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "username": "admin",
+      "password": "admin123",
+      "role": "ADMIN"
+    },
+    {
+      "id": "2",
+      "username": "user",
+      "password": "user123",
+      "role": "USER"
+    }
+  ],
+  "customers": [
+    {
+      "id": "1",
+      "name": "Siraj Chaudhary",
+      "email": "siraj@example.com"
+    },
+    {
+      "id": "2",
+      "name": "Kausar Pathan",
+      "email": "ahmed@example.com"
+    },
+    {
+      "id": "3",
+      "name": "John Smith",
+      "email": "john@example.com"
+    },
+    {
+      "name": "newcustomer",
+      "email": "newcustomer@example.com",
+      "id": "rNjL7OjAmh8"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}

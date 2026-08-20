@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "my-angular-application": {
+    "customer-management": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -57,10 +57,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "my-angular-application:build:production"
+              "buildTarget": "customer-management:build:production"
             },
             "development": {
-              "buildTarget": "my-angular-application:build:development"
+              "buildTarget": "customer-management:build:development"
             }
           },
           "defaultConfiguration": "development"

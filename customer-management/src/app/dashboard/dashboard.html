@@ -1,0 +1,48 @@
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between">
+  
+      <div>
+  
+        <h1>
+          Dashboard
+        </h1>
+  
+        <p>
+          Welcome, {{ username }}
+        </p>
+  
+        <p>
+          Role: {{ role }}
+        </p>
+  
+      </div>
+  
+      <button
+        class="btn btn-danger"
+        (click)="logout()">
+  
+        Logout
+  
+      </button>
+  
+    </div>
+  
+    <div class="card mt-4">
+  
+      <div class="card-body">
+  
+        <h5>
+          Total Customers
+        </h5>
+  
+        <h2>
+          {{ customerCount() }}
+        </h2>
+  
+      </div>
+  
+    </div>
+  
+  </div>
+  
